@@ -5,6 +5,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.restaurant.backend.inventory.domain.Inventory;
+import com.restaurant.backend.inventory.repository.InventoryRepository;
 import com.restaurant.backend.menu.domain.Menu;
 import com.restaurant.backend.menu.domain.MenuStatus;
 import com.restaurant.backend.menu.repository.MenuRepository;
@@ -62,8 +64,12 @@ class AdminOrderStatusIntegrationTest {
     @Autowired
     private ReviewRepository reviewRepository;
 
+    @Autowired
+    private InventoryRepository inventoryRepository;
+
     private Long orderId;
     private Long userId;
+    private Long menuId;
 
     @BeforeEach
     void setUp() {
@@ -73,6 +79,7 @@ class AdminOrderStatusIntegrationTest {
         orderItemRepository.deleteAll();
         favoriteRepository.deleteAll();
         orderRepository.deleteAll();
+        inventoryRepository.deleteAll();
         userRepository.deleteAll();
         menuRepository.deleteAll();
 
@@ -86,11 +93,13 @@ class AdminOrderStatusIntegrationTest {
                 15,
                 MenuStatus.AVAILABLE
         ));
+        inventoryRepository.save(Inventory.create(menu, 4));
         Order order = orderRepository.save(Order.create(user, 9000, OrderStatus.RECEIVED));
         orderItemRepository.save(OrderItem.create(order, menu, 1, 9000));
 
         orderId = order.getId();
         userId = user.getId();
+        menuId = menu.getId();
     }
 
     @Test
@@ -172,5 +181,22 @@ class AdminOrderStatusIntegrationTest {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.errorCode").value("ORDER_NOT_FOUND"));
+    }
+
+    @Test
+    void updateOrderStatusToCanceledRestoresInventory() throws Exception {
+        mockMvc.perform(patch("/admin/orders/{orderId}/status", orderId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "status": "CANCELED"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.status").value("CANCELED"));
+
+        assertThat(inventoryRepository.findByMenu_Id(menuId).orElseThrow().getQuantity()).isEqualTo(5);
+        assertThat(menuRepository.findById(menuId).orElseThrow().getStatus()).isEqualTo(MenuStatus.AVAILABLE);
     }
 }

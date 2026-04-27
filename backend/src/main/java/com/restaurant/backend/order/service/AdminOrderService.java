@@ -2,6 +2,7 @@ package com.restaurant.backend.order.service;
 
 import com.restaurant.backend.common.exception.BusinessException;
 import com.restaurant.backend.common.exception.ErrorCode;
+import com.restaurant.backend.inventory.service.InventoryService;
 import com.restaurant.backend.notification.service.NotificationService;
 import com.restaurant.backend.order.domain.Order;
 import com.restaurant.backend.order.domain.OrderStatus;
@@ -21,15 +22,18 @@ public class AdminOrderService {
     private final OrderRepository orderRepository;
     private final OrderStatusHistoryRepository orderStatusHistoryRepository;
     private final NotificationService notificationService;
+    private final InventoryService inventoryService;
 
     public AdminOrderService(
             OrderRepository orderRepository,
             OrderStatusHistoryRepository orderStatusHistoryRepository,
-            NotificationService notificationService
+            NotificationService notificationService,
+            InventoryService inventoryService
     ) {
         this.orderRepository = orderRepository;
         this.orderStatusHistoryRepository = orderStatusHistoryRepository;
         this.notificationService = notificationService;
+        this.inventoryService = inventoryService;
     }
 
     @Transactional
@@ -49,6 +53,9 @@ public class AdminOrderService {
         }
 
         order.changeStatus(nextStatus);
+        if (nextStatus == OrderStatus.CANCELED) {
+            inventoryService.restoreInventoryForCanceledOrder(order);
+        }
         orderStatusHistoryRepository.save(
                 OrderStatusHistory.create(order, currentStatus, nextStatus, SYSTEM_ADMIN)
         );

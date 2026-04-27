@@ -2,6 +2,7 @@ package com.restaurant.backend.order.service;
 
 import com.restaurant.backend.common.exception.BusinessException;
 import com.restaurant.backend.common.exception.ErrorCode;
+import com.restaurant.backend.inventory.service.InventoryService;
 import com.restaurant.backend.menu.domain.Menu;
 import com.restaurant.backend.menu.domain.MenuStatus;
 import com.restaurant.backend.menu.repository.MenuRepository;
@@ -41,19 +42,22 @@ public class OrderService {
     private final MenuRepository menuRepository;
     private final UserRepository userRepository;
     private final OrderMapper orderMapper;
+    private final InventoryService inventoryService;
 
     public OrderService(
             OrderRepository orderRepository,
             OrderItemRepository orderItemRepository,
             MenuRepository menuRepository,
             UserRepository userRepository,
-            OrderMapper orderMapper
+            OrderMapper orderMapper,
+            InventoryService inventoryService
     ) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.menuRepository = menuRepository;
         this.userRepository = userRepository;
         this.orderMapper = orderMapper;
+        this.inventoryService = inventoryService;
     }
 
     @Transactional
@@ -128,6 +132,7 @@ public class OrderService {
     }
 
     private Order createOrder(User orderUser, List<OrderCreateItemRequest> items, Map<Long, Menu> menuMap) {
+        inventoryService.reserveOrderInventory(items, menuMap);
         int totalPrice = calculateTotalPrice(items, menuMap);
         Order order = orderRepository.save(Order.create(orderUser, totalPrice, OrderStatus.RECEIVED));
 

@@ -23,6 +23,25 @@ public class Inventory extends BaseEntity {
     protected Inventory() {
     }
 
+    public static Inventory create(Menu menu, Integer quantity) {
+        Inventory inventory = new Inventory();
+        inventory.menu = menu;
+        inventory.quantity = quantity;
+        return inventory;
+    }
+
+    public void updateQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
+
+    public void decrease(Integer quantity) {
+        this.quantity -= quantity;
+    }
+
+    public void increase(Integer quantity) {
+        this.quantity += quantity;
+    }
+
     public Menu getMenu() {
         return menu;
     }

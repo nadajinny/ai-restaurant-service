@@ -4,6 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.restaurant.backend.inventory.repository.InventoryRepository;
 import com.restaurant.backend.menu.domain.Menu;
 import com.restaurant.backend.menu.domain.MenuStatus;
 import com.restaurant.backend.menu.repository.MenuRepository;
@@ -57,6 +58,9 @@ class OrderQueryIntegrationTest {
     @Autowired
     private ReviewRepository reviewRepository;
 
+    @Autowired
+    private InventoryRepository inventoryRepository;
+
     private Long userId;
     private Long otherUserId;
     private Long latestOrderId;
@@ -70,6 +74,7 @@ class OrderQueryIntegrationTest {
         orderItemRepository.deleteAll();
         favoriteRepository.deleteAll();
         orderRepository.deleteAll();
+        inventoryRepository.deleteAll();
         userRepository.deleteAll();
         menuRepository.deleteAll();
 

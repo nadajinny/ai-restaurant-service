@@ -5,6 +5,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.restaurant.backend.inventory.domain.Inventory;
+import com.restaurant.backend.inventory.repository.InventoryRepository;
 import com.restaurant.backend.menu.domain.Menu;
 import com.restaurant.backend.menu.domain.MenuStatus;
 import com.restaurant.backend.menu.repository.MenuRepository;
@@ -59,6 +61,9 @@ class OrderControllerIntegrationTest {
     @Autowired
     private ReviewRepository reviewRepository;
 
+    @Autowired
+    private InventoryRepository inventoryRepository;
+
     private Long availableMenuId1;
     private Long availableMenuId2;
     private Long soldOutMenuId;
@@ -72,12 +77,13 @@ class OrderControllerIntegrationTest {
         orderItemRepository.deleteAll();
         favoriteRepository.deleteAll();
         orderRepository.deleteAll();
+        inventoryRepository.deleteAll();
         userRepository.deleteAll();
         menuRepository.deleteAll();
 
         userId = userRepository.save(User.create("order-api-user", "password", "주문 API 사용자", UserRole.USER)).getId();
 
-        availableMenuId1 = menuRepository.save(Menu.create(
+        Menu availableMenu1 = menuRepository.save(Menu.create(
                 "김치찌개",
                 "KOREAN",
                 9000,
@@ -85,9 +91,11 @@ class OrderControllerIntegrationTest {
                 "https://example.com/kimchi.jpg",
                 15,
                 MenuStatus.AVAILABLE
-        )).getId();
+        ));
+        availableMenuId1 = availableMenu1.getId();
+        inventoryRepository.save(Inventory.create(availableMenu1, 5));
 
-        availableMenuId2 = menuRepository.save(Menu.create(
+        Menu availableMenu2 = menuRepository.save(Menu.create(
                 "제육볶음",
                 "KOREAN",
                 11000,
@@ -95,9 +103,11 @@ class OrderControllerIntegrationTest {
                 "https://example.com/pork.jpg",
                 12,
                 MenuStatus.AVAILABLE
-        )).getId();
+        ));
+        availableMenuId2 = availableMenu2.getId();
+        inventoryRepository.save(Inventory.create(availableMenu2, 1));
 
-        soldOutMenuId = menuRepository.save(Menu.create(
+        Menu soldOutMenu = menuRepository.save(Menu.create(
                 "돈까스",
                 "JAPANESE",
                 12000,
@@ -105,7 +115,9 @@ class OrderControllerIntegrationTest {
                 "https://example.com/tonkatsu.jpg",
                 18,
                 MenuStatus.SOLD_OUT
-        )).getId();
+        ));
+        soldOutMenuId = soldOutMenu.getId();
+        inventoryRepository.save(Inventory.create(soldOutMenu, 0));
     }
 
     @Test
@@ -137,6 +149,9 @@ class OrderControllerIntegrationTest {
         assertThat(order.getStatus()).isEqualTo(OrderStatus.RECEIVED);
         assertThat(order.getTotalPrice()).isEqualTo(29000);
         assertThat(orderItemRepository.countByOrder_Id(orderId)).isEqualTo(2);
+        assertThat(inventoryRepository.findByMenu_Id(availableMenuId1).orElseThrow().getQuantity()).isEqualTo(3);
+        assertThat(inventoryRepository.findByMenu_Id(availableMenuId2).orElseThrow().getQuantity()).isEqualTo(0);
+        assertThat(menuRepository.findById(availableMenuId2).orElseThrow().getStatus()).isEqualTo(MenuStatus.SOLD_OUT);
     }
 
     @Test
@@ -200,6 +215,22 @@ class OrderControllerIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.errorCode").value("MENU_NOT_ORDERABLE"));
+    }
+
+    @Test
+    void createOrderRejectsWhenRequestedQuantityExceedsInventory() throws Exception {
+        mockMvc.perform(post("/orders")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "items": [
+                                    { "menuId": %d, "quantity": 2 }
+                                  ]
+                                }
+                                """.formatted(availableMenuId2)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.errorCode").value("INSUFFICIENT_STOCK"));
     }
 
     @Test
