@@ -73,12 +73,12 @@ class MenuControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.length()").value(2))
-                .andExpect(jsonPath("$.data[0].name").value("김치찌개"))
-                .andExpect(jsonPath("$.data[0].status").value("AVAILABLE"))
-                .andExpect(jsonPath("$.data[0].orderable").value(true))
-                .andExpect(jsonPath("$.data[1].name").value("돈까스"))
-                .andExpect(jsonPath("$.data[1].status").value("SOLD_OUT"))
-                .andExpect(jsonPath("$.data[1].orderable").value(false));
+                .andExpect(jsonPath("$.data[0].name").value("돈까스"))
+                .andExpect(jsonPath("$.data[0].status").value("SOLD_OUT"))
+                .andExpect(jsonPath("$.data[0].orderable").value(false))
+                .andExpect(jsonPath("$.data[1].name").value("김치찌개"))
+                .andExpect(jsonPath("$.data[1].status").value("AVAILABLE"))
+                .andExpect(jsonPath("$.data[1].orderable").value(true));
     }
 
     @Test
@@ -89,6 +89,73 @@ class MenuControllerIntegrationTest {
                 .andExpect(jsonPath("$.data.length()").value(1))
                 .andExpect(jsonPath("$.data[0].name").value("김치찌개"))
                 .andExpect(jsonPath("$.data[0].category").value("KOREAN"));
+    }
+
+    @Test
+    void getMenusByPriceRangeReturnsFilteredMenus() throws Exception {
+        mockMvc.perform(get("/menus")
+                        .param("minPrice", "10000")
+                        .param("maxPrice", "12000"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].name").value("돈까스"));
+    }
+
+    @Test
+    void getMenusByStatusReturnsFilteredMenus() throws Exception {
+        mockMvc.perform(get("/menus").param("status", "AVAILABLE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.length()").value(1))
+                .andExpect(jsonPath("$.data[0].name").value("김치찌개"))
+                .andExpect(jsonPath("$.data[0].status").value("AVAILABLE"));
+    }
+
+    @Test
+    void getMenusPriceAscendingSortWorks() throws Exception {
+        mockMvc.perform(get("/menus").param("sort", "PRICE_ASC"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[0].name").value("김치찌개"))
+                .andExpect(jsonPath("$.data[1].name").value("돈까스"));
+    }
+
+    @Test
+    void getMenusPriceDescendingSortWorks() throws Exception {
+        mockMvc.perform(get("/menus").param("sort", "PRICE_DESC"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data[0].name").value("돈까스"))
+                .andExpect(jsonPath("$.data[1].name").value("김치찌개"));
+    }
+
+    @Test
+    void getMenusInvalidPriceRangeReturnsBadRequest() throws Exception {
+        mockMvc.perform(get("/menus")
+                        .param("minPrice", "15000")
+                        .param("maxPrice", "10000"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("minPrice는 maxPrice보다 클 수 없습니다."))
+                .andExpect(jsonPath("$.errorCode").value("INVALID_INPUT_VALUE"));
+    }
+
+    @Test
+    void getMenusHiddenStatusFilterReturnsBadRequest() throws Exception {
+        mockMvc.perform(get("/menus").param("status", "HIDDEN"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("고객용 조회에서는 HIDDEN 상태를 조회할 수 없습니다."))
+                .andExpect(jsonPath("$.errorCode").value("INVALID_INPUT_VALUE"));
+    }
+
+    @Test
+    void getMenusInvalidSortReturnsBadRequest() throws Exception {
+        mockMvc.perform(get("/menus").param("sort", "UNKNOWN"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.errorCode").value("INVALID_INPUT_VALUE"));
     }
 
     @Test

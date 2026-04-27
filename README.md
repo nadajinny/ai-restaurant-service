@@ -94,6 +94,7 @@ cd backend
 - `GET /api/v1/users/sample`
 - `GET /menus`
 - `GET /menus?category=KOREAN`
+- `GET /menus?minPrice=8000&maxPrice=12000&status=AVAILABLE&sort=PRICE_ASC`
 - `GET /menus/{menuId}`
 - `GET /api/v1/orders/sample`
 - `POST /api/v1/ai/recommendations/mock`
@@ -117,6 +118,7 @@ curl -X POST http://localhost:8080/api/v1/ai/recommendations/mock \
 ```bash
 curl http://localhost:8080/menus
 curl "http://localhost:8080/menus?category=KOREAN"
+curl "http://localhost:8080/menus?minPrice=8000&maxPrice=12000&status=AVAILABLE&sort=PRICE_ASC"
 curl http://localhost:8080/menus/1
 ```
 
