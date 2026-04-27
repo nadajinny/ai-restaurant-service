@@ -86,6 +86,8 @@ cd backend
 
 기본 포트는 `8080`이다.
 
+기본 데이터베이스는 SQLite이며, 실행 시 `backend/restaurant.db` 파일이 생성될 수 있다.
+
 예시 엔드포인트
 
 - `GET /api/v1/health`

@@ -6,7 +6,7 @@ spring:
     driver-class-name: org.sqlite.JDBC
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: update
     open-in-view: false
     properties:
       hibernate:

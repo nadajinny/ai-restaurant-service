@@ -1,36 +1,52 @@
 package com.restaurant.backend.coupon.domain;
 
+import com.restaurant.backend.common.entity.BaseEntity;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "coupons")
-public class Coupon {
+public class Coupon extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+    @Column(nullable = false, unique = true, length = 50)
     private String code;
-    private Integer discountAmount;
-    private String status;
 
-    public Long getId() {
-        return id;
+    @Column(nullable = false, length = 100)
+    private String name;
+
+    @Column(nullable = false)
+    private Integer discountAmount;
+
+    @Column(nullable = false)
+    private boolean active;
+
+    @OneToMany(mappedBy = "coupon")
+    private List<CouponUsage> couponUsages = new ArrayList<>();
+
+    protected Coupon() {
     }
 
     public String getCode() {
         return code;
     }
 
+    public String getName() {
+        return name;
+    }
+
     public Integer getDiscountAmount() {
         return discountAmount;
     }
 
-    public String getStatus() {
-        return status;
+    public boolean isActive() {
+        return active;
+    }
+
+    public List<CouponUsage> getCouponUsages() {
+        return couponUsages;
     }
 }

@@ -1,0 +1,77 @@
+package com.restaurant.backend.order.domain;
+
+import com.restaurant.backend.common.entity.BaseEntity;
+import com.restaurant.backend.payment.domain.Payment;
+import com.restaurant.backend.review.domain.Review;
+import com.restaurant.backend.user.domain.User;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "orders")
+public class Order extends BaseEntity {
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @Column(nullable = false)
+    private Integer totalPrice;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private OrderStatus status;
+
+    @OneToMany(mappedBy = "order")
+    private List<OrderItem> orderItems = new ArrayList<>();
+
+    @OneToMany(mappedBy = "order")
+    private List<Review> reviews = new ArrayList<>();
+
+    @OneToOne(mappedBy = "order")
+    private Payment payment;
+
+    @OneToMany(mappedBy = "order")
+    private List<OrderStatusHistory> statusHistories = new ArrayList<>();
+
+    protected Order() {
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public Integer getTotalPrice() {
+        return totalPrice;
+    }
+
+    public OrderStatus getStatus() {
+        return status;
+    }
+
+    public List<OrderItem> getOrderItems() {
+        return orderItems;
+    }
+
+    public List<Review> getReviews() {
+        return reviews;
+    }
+
+    public Payment getPayment() {
+        return payment;
+    }
+
+    public List<OrderStatusHistory> getStatusHistories() {
+        return statusHistories;
+    }
+}
