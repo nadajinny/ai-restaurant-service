@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: backend
+  datasource:
+    url: jdbc:sqlite:./restaurant.db
+    driver-class-name: org.sqlite.JDBC
+  jpa:
+    hibernate:
+      ddl-auto: none
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.community.dialect.SQLiteDialect
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+server:
+  port: 8080
