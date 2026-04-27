@@ -10,6 +10,7 @@ public enum ErrorCode {
     MENU_NOT_FOUND(HttpStatus.NOT_FOUND, "MENU_NOT_FOUND", "메뉴를 찾을 수 없습니다."),
     MENU_NOT_ORDERABLE(HttpStatus.BAD_REQUEST, "MENU_NOT_ORDERABLE", "주문 가능한 메뉴가 아닙니다."),
     FAVORITE_NOT_FOUND(HttpStatus.NOT_FOUND, "FAVORITE_NOT_FOUND", "즐겨찾기를 찾을 수 없습니다."),
+    REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "REVIEW_NOT_FOUND", "리뷰를 찾을 수 없습니다."),
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER_NOT_FOUND", "사용자를 찾을 수 없습니다."),
     ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "ORDER_NOT_FOUND", "주문을 찾을 수 없습니다."),
     REORDER_NOT_AVAILABLE(HttpStatus.BAD_REQUEST, "REORDER_NOT_AVAILABLE", "재주문 가능한 메뉴가 없습니다."),

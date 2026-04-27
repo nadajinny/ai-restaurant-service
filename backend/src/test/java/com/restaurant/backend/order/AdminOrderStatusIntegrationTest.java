@@ -17,6 +17,7 @@ import com.restaurant.backend.order.domain.OrderStatusHistory;
 import com.restaurant.backend.order.repository.OrderItemRepository;
 import com.restaurant.backend.order.repository.OrderRepository;
 import com.restaurant.backend.order.repository.OrderStatusHistoryRepository;
+import com.restaurant.backend.review.repository.ReviewRepository;
 import com.restaurant.backend.favorite.repository.FavoriteRepository;
 import com.restaurant.backend.user.domain.User;
 import com.restaurant.backend.user.domain.UserRole;
@@ -58,6 +59,9 @@ class AdminOrderStatusIntegrationTest {
     @Autowired
     private FavoriteRepository favoriteRepository;
 
+    @Autowired
+    private ReviewRepository reviewRepository;
+
     private Long orderId;
     private Long userId;
 
@@ -65,6 +69,7 @@ class AdminOrderStatusIntegrationTest {
     void setUp() {
         notificationRepository.deleteAll();
         orderStatusHistoryRepository.deleteAll();
+        reviewRepository.deleteAll();
         orderItemRepository.deleteAll();
         favoriteRepository.deleteAll();
         orderRepository.deleteAll();

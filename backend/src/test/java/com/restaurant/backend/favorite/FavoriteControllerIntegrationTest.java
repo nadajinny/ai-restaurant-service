@@ -11,6 +11,7 @@ import com.restaurant.backend.favorite.repository.FavoriteRepository;
 import com.restaurant.backend.menu.domain.Menu;
 import com.restaurant.backend.menu.domain.MenuStatus;
 import com.restaurant.backend.menu.repository.MenuRepository;
+import com.restaurant.backend.review.repository.ReviewRepository;
 import com.restaurant.backend.user.domain.User;
 import com.restaurant.backend.user.domain.UserRole;
 import com.restaurant.backend.user.repository.UserRepository;
@@ -38,6 +39,9 @@ class FavoriteControllerIntegrationTest {
     @Autowired
     private MenuRepository menuRepository;
 
+    @Autowired
+    private ReviewRepository reviewRepository;
+
     private Long userId;
     private Long availableMenuId;
     private Long soldOutMenuId;
@@ -45,6 +49,7 @@ class FavoriteControllerIntegrationTest {
     @BeforeEach
     void setUp() {
         favoriteRepository.deleteAll();
+        reviewRepository.deleteAll();
         userRepository.deleteAll();
         menuRepository.deleteAll();
 

@@ -45,6 +45,40 @@ public class Review extends BaseEntity {
     protected Review() {
     }
 
+    public static Review create(
+            User user,
+            Menu menu,
+            Order order,
+            String content,
+            Integer rating,
+            boolean aiGenerated,
+            ReviewStatus status
+    ) {
+        Review review = new Review();
+        review.user = user;
+        review.menu = menu;
+        review.order = order;
+        review.content = content;
+        review.rating = rating;
+        review.aiGenerated = aiGenerated;
+        review.status = status;
+        return review;
+    }
+
+    public void update(String content, Integer rating, boolean aiGenerated) {
+        this.content = content;
+        this.rating = rating;
+        this.aiGenerated = aiGenerated;
+    }
+
+    public void hide() {
+        this.status = ReviewStatus.HIDDEN;
+    }
+
+    public void delete() {
+        this.status = ReviewStatus.DELETED;
+    }
+
     public User getUser() {
         return user;
     }

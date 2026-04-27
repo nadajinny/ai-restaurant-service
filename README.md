@@ -103,6 +103,12 @@ cd backend
 - `GET /orders/{orderId}?userId=1`
 - `POST /orders`
 - `POST /orders/{orderId}/reorder?userId=1`
+- `POST /reviews?userId=1`
+- `GET /menus/{menuId}/reviews`
+- `PUT /reviews/{reviewId}?userId=1`
+- `DELETE /reviews/{reviewId}?userId=1`
+- `GET /admin/reviews`
+- `PATCH /admin/reviews/{reviewId}/hide`
 - `PATCH /admin/orders/{orderId}/status`
 - `POST /admin/menus`
 - `PUT /admin/menus/{menuId}`
@@ -205,6 +211,34 @@ curl -X PATCH http://localhost:8080/admin/orders/1/status \
   }'
 ```
 
+리뷰 API 예시
+
+```bash
+curl -X POST "http://localhost:8080/reviews?userId=1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "orderId": 1,
+    "menuId": 1,
+    "content": "맛있고 양도 충분했습니다.",
+    "rating": 5,
+    "aiGenerated": false
+  }'
+
+curl "http://localhost:8080/menus/1/reviews"
+
+curl -X PUT "http://localhost:8080/reviews/1?userId=1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "양도 충분하고 다시 주문하고 싶습니다.",
+    "rating": 5,
+    "aiGenerated": true
+  }'
+
+curl -X DELETE "http://localhost:8080/reviews/1?userId=1"
+curl "http://localhost:8080/admin/reviews"
+curl -X PATCH "http://localhost:8080/admin/reviews/1/hide"
+```
+
 ## 테스트 방법
 
 ```bash
@@ -212,4 +246,4 @@ cd backend
 ./gradlew test
 ```
 
-현재 단계에서는 실제 비즈니스 로직 대신 컴파일 가능한 기본 패키지 구조와 최소 Mock 응답만 구성되어 있다.
+현재는 메뉴 조회/관리, 주문 생성/조회/재주문/상태 변경, 즐겨찾기, 리뷰 기능까지 포함한 기본 백엔드 흐름이 구현되어 있으며, 인증과 AI 고도화는 이후 단계에서 확장할 수 있다.
