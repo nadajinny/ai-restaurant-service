@@ -30,6 +30,13 @@ public class Favorite extends BaseEntity {
     protected Favorite() {
     }
 
+    public static Favorite create(User user, Menu menu) {
+        Favorite favorite = new Favorite();
+        favorite.user = user;
+        favorite.menu = menu;
+        return favorite;
+    }
+
     public User getUser() {
         return user;
     }

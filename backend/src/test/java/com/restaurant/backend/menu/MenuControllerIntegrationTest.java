@@ -11,6 +11,7 @@ import com.restaurant.backend.notification.repository.NotificationRepository;
 import com.restaurant.backend.order.repository.OrderItemRepository;
 import com.restaurant.backend.order.repository.OrderRepository;
 import com.restaurant.backend.order.repository.OrderStatusHistoryRepository;
+import com.restaurant.backend.favorite.repository.FavoriteRepository;
 import com.restaurant.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,9 @@ class MenuControllerIntegrationTest {
     @Autowired
     private NotificationRepository notificationRepository;
 
+    @Autowired
+    private FavoriteRepository favoriteRepository;
+
     private Long availableMenuId;
     private Long soldOutMenuId;
     private Long hiddenMenuId;
@@ -53,6 +57,7 @@ class MenuControllerIntegrationTest {
         notificationRepository.deleteAll();
         orderStatusHistoryRepository.deleteAll();
         orderItemRepository.deleteAll();
+        favoriteRepository.deleteAll();
         orderRepository.deleteAll();
         userRepository.deleteAll();
         menuRepository.deleteAll();

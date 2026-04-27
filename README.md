@@ -96,6 +96,9 @@ cd backend
 - `GET /menus?category=KOREAN`
 - `GET /menus?minPrice=8000&maxPrice=12000&status=AVAILABLE&sort=PRICE_ASC`
 - `GET /menus/{menuId}`
+- `POST /favorites?userId=1`
+- `GET /favorites?userId=1`
+- `DELETE /favorites/{menuId}?userId=1`
 - `GET /orders?userId=1`
 - `GET /orders/{orderId}?userId=1`
 - `POST /orders`
@@ -144,6 +147,19 @@ curl -X POST http://localhost:8080/admin/menus \
     "cookingTime": 12,
     "status": "AVAILABLE"
   }'
+```
+
+즐겨찾기 예시
+
+```bash
+curl -X POST "http://localhost:8080/favorites?userId=1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "menuId": 1
+  }'
+
+curl "http://localhost:8080/favorites?userId=1"
+curl -X DELETE "http://localhost:8080/favorites/1?userId=1"
 ```
 
 주문 생성 예시
