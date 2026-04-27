@@ -1,0 +1,80 @@
+package com.restaurant.backend.menu.service;
+
+import com.restaurant.backend.common.exception.BusinessException;
+import com.restaurant.backend.common.exception.ErrorCode;
+import com.restaurant.backend.menu.domain.Menu;
+import com.restaurant.backend.menu.dto.AdminMenuRequest;
+import com.restaurant.backend.menu.dto.AdminMenuResponse;
+import com.restaurant.backend.menu.dto.AdminMenuStatusUpdateRequest;
+import com.restaurant.backend.menu.repository.MenuRepository;
+import com.restaurant.backend.order.repository.OrderItemRepository;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class AdminMenuService {
+
+    private final MenuRepository menuRepository;
+    private final OrderItemRepository orderItemRepository;
+    private final MenuMapper menuMapper;
+
+    public AdminMenuService(
+            MenuRepository menuRepository,
+            OrderItemRepository orderItemRepository,
+            MenuMapper menuMapper
+    ) {
+        this.menuRepository = menuRepository;
+        this.orderItemRepository = orderItemRepository;
+        this.menuMapper = menuMapper;
+    }
+
+    @Transactional
+    public AdminMenuResponse createMenu(AdminMenuRequest request) {
+        // TODO: 관리자 권한 검증은 인증 기능 구현 후 적용한다.
+        Menu menu = menuMapper.toMenu(request);
+        return menuMapper.toAdminMenuResponse(menuRepository.save(menu));
+    }
+
+    @Transactional
+    public AdminMenuResponse updateMenu(Long menuId, AdminMenuRequest request) {
+        // TODO: 관리자 권한 검증은 인증 기능 구현 후 적용한다.
+        Menu menu = getMenuById(menuId);
+        menu.update(
+                request.name(),
+                request.category(),
+                request.price(),
+                request.description(),
+                request.imageUrl(),
+                request.cookingTime(),
+                request.status()
+        );
+
+        return menuMapper.toAdminMenuResponse(menu);
+    }
+
+    @Transactional
+    public void deleteMenu(Long menuId) {
+        // TODO: 관리자 권한 검증은 인증 기능 구현 후 적용한다.
+        Menu menu = getMenuById(menuId);
+
+        if (orderItemRepository.existsByMenu_Id(menuId)) {
+            menu.hide();
+            return;
+        }
+
+        menuRepository.delete(menu);
+    }
+
+    @Transactional
+    public AdminMenuResponse updateStatus(Long menuId, AdminMenuStatusUpdateRequest request) {
+        // TODO: 관리자 권한 검증은 인증 기능 구현 후 적용한다.
+        Menu menu = getMenuById(menuId);
+        menu.changeStatus(request.status());
+        return menuMapper.toAdminMenuResponse(menu);
+    }
+
+    private Menu getMenuById(Long menuId) {
+        return menuRepository.findById(menuId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.MENU_NOT_FOUND));
+    }
+}

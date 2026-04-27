@@ -7,6 +7,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.restaurant.backend.menu.domain.Menu;
 import com.restaurant.backend.menu.domain.MenuStatus;
 import com.restaurant.backend.menu.repository.MenuRepository;
+import com.restaurant.backend.order.repository.OrderItemRepository;
+import com.restaurant.backend.order.repository.OrderRepository;
+import com.restaurant.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +27,24 @@ class MenuControllerIntegrationTest {
     @Autowired
     private MenuRepository menuRepository;
 
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
     private Long availableMenuId;
     private Long soldOutMenuId;
     private Long hiddenMenuId;
 
     @BeforeEach
     void setUp() {
+        orderItemRepository.deleteAll();
+        orderRepository.deleteAll();
+        userRepository.deleteAll();
         menuRepository.deleteAll();
 
         Menu availableMenu = menuRepository.save(Menu.create(

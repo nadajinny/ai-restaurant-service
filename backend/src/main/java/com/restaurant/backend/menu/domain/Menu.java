@@ -75,6 +75,32 @@ public class Menu extends BaseEntity {
         return menu;
     }
 
+    public void update(
+            String name,
+            String category,
+            Integer price,
+            String description,
+            String imageUrl,
+            Integer cookingTime,
+            MenuStatus status
+    ) {
+        this.name = name;
+        this.category = category;
+        this.price = price;
+        this.description = description;
+        this.imageUrl = imageUrl;
+        this.cookingTime = cookingTime;
+        this.status = status;
+    }
+
+    public void changeStatus(MenuStatus status) {
+        this.status = status;
+    }
+
+    public void hide() {
+        this.status = MenuStatus.HIDDEN;
+    }
+
     public String getName() {
         return name;
     }

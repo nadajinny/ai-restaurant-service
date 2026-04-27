@@ -47,6 +47,14 @@ public class Order extends BaseEntity {
     protected Order() {
     }
 
+    public static Order create(User user, Integer totalPrice, OrderStatus status) {
+        Order order = new Order();
+        order.user = user;
+        order.totalPrice = totalPrice;
+        order.status = status;
+        return order;
+    }
+
     public User getUser() {
         return user;
     }

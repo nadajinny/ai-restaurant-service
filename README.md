@@ -96,6 +96,10 @@ cd backend
 - `GET /menus?category=KOREAN`
 - `GET /menus?minPrice=8000&maxPrice=12000&status=AVAILABLE&sort=PRICE_ASC`
 - `GET /menus/{menuId}`
+- `POST /admin/menus`
+- `PUT /admin/menus/{menuId}`
+- `DELETE /admin/menus/{menuId}`
+- `PATCH /admin/menus/{menuId}/status`
 - `GET /api/v1/orders/sample`
 - `POST /api/v1/ai/recommendations/mock`
 
@@ -120,6 +124,22 @@ curl http://localhost:8080/menus
 curl "http://localhost:8080/menus?category=KOREAN"
 curl "http://localhost:8080/menus?minPrice=8000&maxPrice=12000&status=AVAILABLE&sort=PRICE_ASC"
 curl http://localhost:8080/menus/1
+```
+
+관리자 메뉴 관리 예시
+
+```bash
+curl -X POST http://localhost:8080/admin/menus \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "새우볶음밥",
+    "category": "CHINESE",
+    "price": 9500,
+    "description": "불향이 나는 새우볶음밥",
+    "imageUrl": "https://example.com/fried-rice.jpg",
+    "cookingTime": 12,
+    "status": "AVAILABLE"
+  }'
 ```
 
 ## 테스트 방법

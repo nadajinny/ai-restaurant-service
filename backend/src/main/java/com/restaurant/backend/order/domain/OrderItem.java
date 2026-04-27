@@ -30,6 +30,15 @@ public class OrderItem extends BaseEntity {
     protected OrderItem() {
     }
 
+    public static OrderItem create(Order order, Menu menu, Integer quantity, Integer itemPrice) {
+        OrderItem orderItem = new OrderItem();
+        orderItem.order = order;
+        orderItem.menu = menu;
+        orderItem.quantity = quantity;
+        orderItem.itemPrice = itemPrice;
+        return orderItem;
+    }
+
     public Order getOrder() {
         return order;
     }

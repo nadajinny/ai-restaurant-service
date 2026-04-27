@@ -19,9 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class MenuService {
 
     private final MenuRepository menuRepository;
+    private final MenuMapper menuMapper;
 
-    public MenuService(MenuRepository menuRepository) {
+    public MenuService(MenuRepository menuRepository, MenuMapper menuMapper) {
         this.menuRepository = menuRepository;
+        this.menuMapper = menuMapper;
     }
 
     @Transactional(readOnly = true)
@@ -34,7 +36,7 @@ public class MenuService {
         );
 
         return menus.stream()
-                .map(this::toMenuListResponse)
+                .map(menuMapper::toMenuListResponse)
                 .toList();
     }
 
@@ -43,38 +45,7 @@ public class MenuService {
         Menu menu = menuRepository.findByIdAndStatusNot(menuId, MenuStatus.HIDDEN)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENU_NOT_FOUND));
 
-        return toMenuDetailResponse(menu);
-    }
-
-    private MenuListResponse toMenuListResponse(Menu menu) {
-        return new MenuListResponse(
-                menu.getId(),
-                menu.getName(),
-                menu.getPrice(),
-                menu.getCategory(),
-                menu.getImageUrl(),
-                menu.getCookingTime(),
-                menu.getStatus(),
-                isOrderable(menu)
-        );
-    }
-
-    private MenuDetailResponse toMenuDetailResponse(Menu menu) {
-        return new MenuDetailResponse(
-                menu.getId(),
-                menu.getName(),
-                menu.getPrice(),
-                menu.getCategory(),
-                menu.getDescription(),
-                menu.getImageUrl(),
-                menu.getCookingTime(),
-                menu.getStatus(),
-                isOrderable(menu)
-        );
-    }
-
-    private boolean isOrderable(Menu menu) {
-        return menu.getStatus() == MenuStatus.AVAILABLE;
+        return menuMapper.toMenuDetailResponse(menu);
     }
 
     private void validateSearchRequest(MenuSearchRequest request) {

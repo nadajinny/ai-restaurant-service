@@ -46,6 +46,15 @@ public class User extends BaseEntity {
     protected User() {
     }
 
+    public static User create(String loginId, String password, String name, UserRole role) {
+        User user = new User();
+        user.loginId = loginId;
+        user.password = password;
+        user.name = name;
+        user.role = role;
+        return user;
+    }
+
     public String getLoginId() {
         return loginId;
     }
