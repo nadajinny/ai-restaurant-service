@@ -6,6 +6,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.restaurant.backend.coupon.repository.CouponRepository;
+import com.restaurant.backend.coupon.repository.CouponUsageRepository;
 import com.restaurant.backend.favorite.repository.FavoriteRepository;
 import com.restaurant.backend.inventory.domain.Inventory;
 import com.restaurant.backend.inventory.repository.InventoryRepository;
@@ -71,6 +73,12 @@ class PaymentControllerIntegrationTest {
     @Autowired
     private ReviewRepository reviewRepository;
 
+    @Autowired
+    private CouponUsageRepository couponUsageRepository;
+
+    @Autowired
+    private CouponRepository couponRepository;
+
     private Long orderId;
     private Long menuId;
     private Long userId;
@@ -82,9 +90,11 @@ class PaymentControllerIntegrationTest {
         reviewRepository.deleteAll();
         orderItemRepository.deleteAll();
         favoriteRepository.deleteAll();
+        couponUsageRepository.deleteAll();
         paymentRepository.deleteAll();
         orderRepository.deleteAll();
         inventoryRepository.deleteAll();
+        couponRepository.deleteAll();
         userRepository.deleteAll();
         menuRepository.deleteAll();
 

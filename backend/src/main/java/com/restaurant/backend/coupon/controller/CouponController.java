@@ -1,14 +1,21 @@
 package com.restaurant.backend.coupon.controller;
 
 import com.restaurant.backend.common.response.ApiResponse;
-import com.restaurant.backend.coupon.dto.CouponSummaryDto;
+import com.restaurant.backend.coupon.dto.AvailableCouponResponse;
+import com.restaurant.backend.coupon.dto.CouponApplyRequest;
+import com.restaurant.backend.coupon.dto.CouponApplyResponse;
 import com.restaurant.backend.coupon.service.CouponService;
+import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/coupons")
+@RequestMapping("/coupons")
 public class CouponController {
 
     private final CouponService couponService;
@@ -17,8 +24,16 @@ public class CouponController {
         this.couponService = couponService;
     }
 
-    @GetMapping("/sample")
-    public ApiResponse<CouponSummaryDto> getSampleCoupon() {
-        return ApiResponse.success(couponService.getSampleCoupon());
+    @GetMapping("/available")
+    public ApiResponse<List<AvailableCouponResponse>> getAvailableCoupons() {
+        return ApiResponse.success(couponService.getAvailableCoupons());
+    }
+
+    @PostMapping("/apply")
+    public ApiResponse<CouponApplyResponse> applyCoupon(
+            @RequestParam Long userId,
+            @Valid @RequestBody CouponApplyRequest request
+    ) {
+        return ApiResponse.success("쿠폰이 적용되었습니다.", couponService.applyCoupon(userId, request));
     }
 }

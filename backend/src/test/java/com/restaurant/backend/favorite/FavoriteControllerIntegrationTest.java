@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.restaurant.backend.favorite.repository.FavoriteRepository;
+import com.restaurant.backend.coupon.repository.CouponRepository;
+import com.restaurant.backend.coupon.repository.CouponUsageRepository;
 import com.restaurant.backend.inventory.repository.InventoryRepository;
 import com.restaurant.backend.menu.domain.Menu;
 import com.restaurant.backend.menu.domain.MenuStatus;
@@ -66,6 +68,12 @@ class FavoriteControllerIntegrationTest {
     @Autowired
     private OrderRepository orderRepository;
 
+    @Autowired
+    private CouponUsageRepository couponUsageRepository;
+
+    @Autowired
+    private CouponRepository couponRepository;
+
     private Long userId;
     private Long availableMenuId;
     private Long soldOutMenuId;
@@ -77,9 +85,11 @@ class FavoriteControllerIntegrationTest {
         favoriteRepository.deleteAll();
         reviewRepository.deleteAll();
         orderItemRepository.deleteAll();
+        couponUsageRepository.deleteAll();
         paymentRepository.deleteAll();
         orderRepository.deleteAll();
         inventoryRepository.deleteAll();
+        couponRepository.deleteAll();
         userRepository.deleteAll();
         menuRepository.deleteAll();
 

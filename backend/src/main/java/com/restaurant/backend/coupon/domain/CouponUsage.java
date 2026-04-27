@@ -32,6 +32,15 @@ public class CouponUsage extends BaseEntity {
     protected CouponUsage() {
     }
 
+    public static CouponUsage create(Coupon coupon, User user, Order order, Integer discountAmount) {
+        CouponUsage couponUsage = new CouponUsage();
+        couponUsage.coupon = coupon;
+        couponUsage.user = user;
+        couponUsage.order = order;
+        couponUsage.discountAmount = discountAmount;
+        return couponUsage;
+    }
+
     public Coupon getCoupon() {
         return coupon;
     }

@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.restaurant.backend.coupon.repository.CouponRepository;
+import com.restaurant.backend.coupon.repository.CouponUsageRepository;
 import com.restaurant.backend.inventory.repository.InventoryRepository;
 import com.restaurant.backend.menu.domain.Menu;
 import com.restaurant.backend.menu.domain.MenuStatus;
@@ -70,6 +72,12 @@ class AdminMenuControllerIntegrationTest {
     @Autowired
     private PaymentRepository paymentRepository;
 
+    @Autowired
+    private CouponUsageRepository couponUsageRepository;
+
+    @Autowired
+    private CouponRepository couponRepository;
+
     @BeforeEach
     void setUp() {
         notificationRepository.deleteAll();
@@ -77,9 +85,11 @@ class AdminMenuControllerIntegrationTest {
         reviewRepository.deleteAll();
         orderItemRepository.deleteAll();
         favoriteRepository.deleteAll();
+        couponUsageRepository.deleteAll();
         paymentRepository.deleteAll();
         orderRepository.deleteAll();
         inventoryRepository.deleteAll();
+        couponRepository.deleteAll();
         userRepository.deleteAll();
         menuRepository.deleteAll();
     }

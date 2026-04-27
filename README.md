@@ -116,6 +116,11 @@ cd backend
 - `POST /payments`
 - `GET /payments/{paymentId}`
 - `POST /payments/{paymentId}/cancel`
+- `POST /admin/coupons`
+- `PUT /admin/coupons/{couponId}`
+- `PATCH /admin/coupons/{couponId}/disable`
+- `GET /coupons/available`
+- `POST /coupons/apply?userId=1`
 - `PATCH /admin/orders/{orderId}/status`
 - `POST /admin/menus`
 - `PUT /admin/menus/{menuId}`
@@ -282,6 +287,50 @@ curl "http://localhost:8080/payments/1"
 curl -X POST "http://localhost:8080/payments/1/cancel"
 ```
 
+쿠폰 예시
+
+```bash
+curl -X POST "http://localhost:8080/admin/coupons" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "WELCOME10",
+    "name": "웰컴 10퍼센트",
+    "discountAmount": null,
+    "discountRate": 10,
+    "maxDiscountAmount": 3000,
+    "minOrderAmount": 10000,
+    "availableFrom": "2026-04-01T00:00:00",
+    "availableTo": "2026-05-31T23:59:59",
+    "availableCount": 100,
+    "active": true
+  }'
+
+curl -X PUT "http://localhost:8080/admin/coupons/1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "code": "WELCOME10",
+    "name": "웰컴 2000원",
+    "discountAmount": 2000,
+    "discountRate": null,
+    "maxDiscountAmount": null,
+    "minOrderAmount": 12000,
+    "availableFrom": "2026-04-01T00:00:00",
+    "availableTo": "2026-05-31T23:59:59",
+    "availableCount": 50,
+    "active": true
+  }'
+
+curl -X PATCH "http://localhost:8080/admin/coupons/1/disable"
+curl "http://localhost:8080/coupons/available"
+
+curl -X POST "http://localhost:8080/coupons/apply?userId=1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "orderId": 1,
+    "couponCode": "WELCOME10"
+  }'
+```
+
 ## 테스트 방법
 
 ```bash
@@ -289,4 +338,4 @@ cd backend
 ./gradlew test
 ```
 
-현재는 메뉴 조회/관리, 주문 생성/조회/재주문/상태 변경, 재고 관리, Mock 결제, 즐겨찾기, 리뷰 기능까지 포함한 기본 백엔드 흐름이 구현되어 있으며, 인증과 AI 고도화는 이후 단계에서 확장할 수 있다.
+현재는 메뉴 조회/관리, 주문 생성/조회/재주문/상태 변경, 재고 관리, Mock 결제, 쿠폰/할인, 즐겨찾기, 리뷰 기능까지 포함한 기본 백엔드 흐름이 구현되어 있으며, 인증과 AI 고도화는 이후 단계에서 확장할 수 있다.

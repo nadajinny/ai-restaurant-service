@@ -28,6 +28,12 @@ public class Order extends BaseEntity {
     @Column(nullable = false)
     private Integer totalPrice;
 
+    @Column(nullable = false)
+    private Integer originalTotalPrice;
+
+    @Column(nullable = false)
+    private Integer discountAmount;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private OrderStatus status;
@@ -51,6 +57,8 @@ public class Order extends BaseEntity {
         Order order = new Order();
         order.user = user;
         order.totalPrice = totalPrice;
+        order.originalTotalPrice = totalPrice;
+        order.discountAmount = 0;
         order.status = status;
         return order;
     }
@@ -68,12 +76,25 @@ public class Order extends BaseEntity {
         this.status = nextStatus;
     }
 
+    public void applyDiscount(Integer discountAmount) {
+        this.discountAmount = discountAmount;
+        this.totalPrice = Math.max(0, this.originalTotalPrice - discountAmount);
+    }
+
     public User getUser() {
         return user;
     }
 
     public Integer getTotalPrice() {
         return totalPrice;
+    }
+
+    public Integer getOriginalTotalPrice() {
+        return originalTotalPrice;
+    }
+
+    public Integer getDiscountAmount() {
+        return discountAmount;
     }
 
     public OrderStatus getStatus() {
