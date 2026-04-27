@@ -11,6 +11,8 @@ import com.restaurant.backend.order.domain.OrderStatus;
 import com.restaurant.backend.order.dto.OrderCreateItemRequest;
 import com.restaurant.backend.order.dto.OrderCreateRequest;
 import com.restaurant.backend.order.dto.OrderCreateResponse;
+import com.restaurant.backend.order.dto.OrderDetailResponse;
+import com.restaurant.backend.order.dto.OrderListResponse;
 import com.restaurant.backend.order.repository.OrderItemRepository;
 import com.restaurant.backend.order.repository.OrderRepository;
 import com.restaurant.backend.user.domain.User;
@@ -31,17 +33,20 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final MenuRepository menuRepository;
     private final UserRepository userRepository;
+    private final OrderMapper orderMapper;
 
     public OrderService(
             OrderRepository orderRepository,
             OrderItemRepository orderItemRepository,
             MenuRepository menuRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            OrderMapper orderMapper
     ) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
         this.menuRepository = menuRepository;
         this.userRepository = userRepository;
+        this.orderMapper = orderMapper;
     }
 
     @Transactional
@@ -66,7 +71,26 @@ public class OrderService {
 
         orderItemRepository.saveAll(orderItems);
 
-        return new OrderCreateResponse(order.getId(), order.getStatus(), order.getTotalPrice());
+        return orderMapper.toOrderCreateResponse(order);
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderListResponse> getOrders(Long userId) {
+        User user = getUserById(userId);
+
+        return orderRepository.findAllByUser_IdOrderByCreatedAtDescIdDesc(user.getId()).stream()
+                .map(orderMapper::toOrderListResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public OrderDetailResponse getOrder(Long orderId, Long userId) {
+        User user = getUserById(userId);
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
+
+        validateOrderOwnership(order, user);
+        return orderMapper.toOrderDetailResponse(order);
     }
 
     private Map<Long, Menu> loadAndValidateMenus(List<OrderCreateItemRequest> items) {
@@ -115,5 +139,16 @@ public class OrderService {
                         "임시 주문 사용자",
                         UserRole.USER
                 )));
+    }
+
+    private User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    private void validateOrderOwnership(Order order, User user) {
+        if (!order.getUser().getId().equals(user.getId())) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED, "다른 사용자의 주문은 조회할 수 없습니다.");
+        }
     }
 }

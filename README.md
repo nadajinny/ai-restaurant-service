@@ -96,6 +96,8 @@ cd backend
 - `GET /menus?category=KOREAN`
 - `GET /menus?minPrice=8000&maxPrice=12000&status=AVAILABLE&sort=PRICE_ASC`
 - `GET /menus/{menuId}`
+- `GET /orders?userId=1`
+- `GET /orders/{orderId}?userId=1`
 - `POST /orders`
 - `POST /admin/menus`
 - `PUT /admin/menus/{menuId}`
@@ -154,6 +156,13 @@ curl -X POST http://localhost:8080/orders \
     ],
     "couponCode": "WELCOME10"
   }'
+```
+
+주문 조회 예시
+
+```bash
+curl "http://localhost:8080/orders?userId=1"
+curl "http://localhost:8080/orders/1?userId=1"
 ```
 
 ## 테스트 방법
