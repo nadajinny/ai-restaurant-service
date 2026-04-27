@@ -55,6 +55,26 @@ public class Menu extends BaseEntity {
     protected Menu() {
     }
 
+    public static Menu create(
+            String name,
+            String category,
+            Integer price,
+            String description,
+            String imageUrl,
+            Integer cookingTime,
+            MenuStatus status
+    ) {
+        Menu menu = new Menu();
+        menu.name = name;
+        menu.category = category;
+        menu.price = price;
+        menu.description = description;
+        menu.imageUrl = imageUrl;
+        menu.cookingTime = cookingTime;
+        menu.status = status;
+        return menu;
+    }
+
     public String getName() {
         return name;
     }

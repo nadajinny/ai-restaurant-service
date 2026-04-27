@@ -92,7 +92,9 @@ cd backend
 
 - `GET /api/v1/health`
 - `GET /api/v1/users/sample`
-- `GET /api/v1/menus/sample`
+- `GET /menus`
+- `GET /menus?category=KOREAN`
+- `GET /menus/{menuId}`
 - `GET /api/v1/orders/sample`
 - `POST /api/v1/ai/recommendations/mock`
 
@@ -108,6 +110,14 @@ AI 추천 Mock 요청 예시
 curl -X POST http://localhost:8080/api/v1/ai/recommendations/mock \
   -H "Content-Type: application/json" \
   -d '{"message":"매운 음식 추천해줘"}'
+```
+
+메뉴 조회 예시
+
+```bash
+curl http://localhost:8080/menus
+curl "http://localhost:8080/menus?category=KOREAN"
+curl http://localhost:8080/menus/1
 ```
 
 ## 테스트 방법
