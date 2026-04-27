@@ -10,10 +10,13 @@ import com.restaurant.backend.menu.domain.MenuStatus;
 import com.restaurant.backend.menu.repository.MenuRepository;
 import com.restaurant.backend.notification.repository.NotificationRepository;
 import com.restaurant.backend.order.domain.Order;
+import com.restaurant.backend.order.domain.OrderItem;
 import com.restaurant.backend.order.domain.OrderStatus;
 import com.restaurant.backend.order.repository.OrderItemRepository;
 import com.restaurant.backend.order.repository.OrderRepository;
 import com.restaurant.backend.order.repository.OrderStatusHistoryRepository;
+import com.restaurant.backend.user.domain.User;
+import com.restaurant.backend.user.domain.UserRole;
 import com.restaurant.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,6 +54,7 @@ class OrderControllerIntegrationTest {
     private Long availableMenuId1;
     private Long availableMenuId2;
     private Long soldOutMenuId;
+    private Long userId;
 
     @BeforeEach
     void setUp() {
@@ -60,6 +64,8 @@ class OrderControllerIntegrationTest {
         orderRepository.deleteAll();
         userRepository.deleteAll();
         menuRepository.deleteAll();
+
+        userId = userRepository.save(User.create("order-api-user", "password", "주문 API 사용자", UserRole.USER)).getId();
 
         availableMenuId1 = menuRepository.save(Menu.create(
                 "김치찌개",
@@ -184,5 +190,111 @@ class OrderControllerIntegrationTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.errorCode").value("MENU_NOT_ORDERABLE"));
+    }
+
+    @Test
+    void reorderCreatesNewOrderWithCurrentMenuPrices() throws Exception {
+        User user = userRepository.findById(userId).orElseThrow();
+        Menu menu1 = menuRepository.findById(availableMenuId1).orElseThrow();
+        Menu menu2 = menuRepository.findById(availableMenuId2).orElseThrow();
+
+        Order originalOrder = orderRepository.save(Order.create(user, 18000, OrderStatus.COMPLETED));
+        orderItemRepository.save(OrderItem.create(originalOrder, menu1, 1, 8000));
+        orderItemRepository.save(OrderItem.create(originalOrder, menu2, 1, 10000));
+
+        String response = mockMvc.perform(post("/orders/{orderId}/reorder", originalOrder.getId())
+                        .param("userId", String.valueOf(userId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("재주문이 생성되었습니다."))
+                .andExpect(jsonPath("$.data.status").value("RECEIVED"))
+                .andExpect(jsonPath("$.data.totalPrice").value(20000))
+                .andExpect(jsonPath("$.data.unavailableItems.length()").value(0))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        Number newOrderIdValue = com.jayway.jsonpath.JsonPath.read(response, "$.data.orderId");
+        long newOrderId = newOrderIdValue.longValue();
+
+        assertThat(newOrderId).isNotEqualTo(originalOrder.getId());
+        assertThat(orderItemRepository.countByOrder_Id(originalOrder.getId())).isEqualTo(2);
+        assertThat(orderItemRepository.countByOrder_Id(newOrderId)).isEqualTo(2);
+    }
+
+    @Test
+    void reorderSkipsUnavailableMenusAndCreatesPartialOrder() throws Exception {
+        User user = userRepository.findById(userId).orElseThrow();
+        Menu availableMenu = menuRepository.findById(availableMenuId1).orElseThrow();
+        Menu soldOutMenu = menuRepository.findById(soldOutMenuId).orElseThrow();
+
+        Order originalOrder = orderRepository.save(Order.create(user, 21000, OrderStatus.COMPLETED));
+        orderItemRepository.save(OrderItem.create(originalOrder, availableMenu, 1, 9000));
+        orderItemRepository.save(OrderItem.create(originalOrder, soldOutMenu, 1, 12000));
+
+        mockMvc.perform(post("/orders/{orderId}/reorder", originalOrder.getId())
+                        .param("userId", String.valueOf(userId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.status").value("RECEIVED"))
+                .andExpect(jsonPath("$.data.totalPrice").value(9000))
+                .andExpect(jsonPath("$.data.unavailableItems.length()").value(1))
+                .andExpect(jsonPath("$.data.unavailableItems[0].menuId").value(soldOutMenuId))
+                .andExpect(jsonPath("$.data.unavailableItems[0].menuName").value("돈까스"));
+    }
+
+    @Test
+    void reorderSupportsSelectingSubsetOfMenus() throws Exception {
+        User user = userRepository.findById(userId).orElseThrow();
+        Menu menu1 = menuRepository.findById(availableMenuId1).orElseThrow();
+        Menu menu2 = menuRepository.findById(availableMenuId2).orElseThrow();
+
+        Order originalOrder = orderRepository.save(Order.create(user, 20000, OrderStatus.COMPLETED));
+        orderItemRepository.save(OrderItem.create(originalOrder, menu1, 1, 9000));
+        orderItemRepository.save(OrderItem.create(originalOrder, menu2, 1, 11000));
+
+        mockMvc.perform(post("/orders/{orderId}/reorder", originalOrder.getId())
+                        .param("userId", String.valueOf(userId))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "menuIds": [%d]
+                                }
+                                """.formatted(availableMenuId2)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.totalPrice").value(11000))
+                .andExpect(jsonPath("$.data.unavailableItems.length()").value(0));
+    }
+
+    @Test
+    void reorderFailsWhenAllMenusAreUnavailable() throws Exception {
+        User user = userRepository.findById(userId).orElseThrow();
+        Menu soldOutMenu = menuRepository.findById(soldOutMenuId).orElseThrow();
+        soldOutMenu.changeStatus(MenuStatus.HIDDEN);
+        menuRepository.save(soldOutMenu);
+
+        Order originalOrder = orderRepository.save(Order.create(user, 12000, OrderStatus.COMPLETED));
+        orderItemRepository.save(OrderItem.create(originalOrder, soldOutMenu, 1, 12000));
+
+        mockMvc.perform(post("/orders/{orderId}/reorder", originalOrder.getId())
+                        .param("userId", String.valueOf(userId)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.errorCode").value("REORDER_NOT_AVAILABLE"));
+    }
+
+    @Test
+    void reorderRejectsOtherUsersOrder() throws Exception {
+        User otherUser = userRepository.save(User.create("other-order-user", "password", "다른 사용자", UserRole.USER));
+        Menu menu1 = menuRepository.findById(availableMenuId1).orElseThrow();
+        Order originalOrder = orderRepository.save(Order.create(otherUser, 9000, OrderStatus.COMPLETED));
+        orderItemRepository.save(OrderItem.create(originalOrder, menu1, 1, 9000));
+
+        mockMvc.perform(post("/orders/{orderId}/reorder", originalOrder.getId())
+                        .param("userId", String.valueOf(userId)))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.errorCode").value("ACCESS_DENIED"));
     }
 }

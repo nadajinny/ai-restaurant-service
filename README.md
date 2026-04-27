@@ -99,6 +99,7 @@ cd backend
 - `GET /orders?userId=1`
 - `GET /orders/{orderId}?userId=1`
 - `POST /orders`
+- `POST /orders/{orderId}/reorder?userId=1`
 - `PATCH /admin/orders/{orderId}/status`
 - `POST /admin/menus`
 - `PUT /admin/menus/{menuId}`
@@ -156,6 +157,18 @@ curl -X POST http://localhost:8080/orders \
       { "menuId": 3, "quantity": 1 }
     ],
     "couponCode": "WELCOME10"
+  }'
+```
+
+재주문 예시
+
+```bash
+curl -X POST "http://localhost:8080/orders/1/reorder?userId=1"
+
+curl -X POST "http://localhost:8080/orders/1/reorder?userId=1" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "menuIds": [1, 3]
   }'
 ```
 

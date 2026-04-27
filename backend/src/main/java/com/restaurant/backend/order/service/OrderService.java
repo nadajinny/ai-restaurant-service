@@ -13,13 +13,20 @@ import com.restaurant.backend.order.dto.OrderCreateRequest;
 import com.restaurant.backend.order.dto.OrderCreateResponse;
 import com.restaurant.backend.order.dto.OrderDetailResponse;
 import com.restaurant.backend.order.dto.OrderListResponse;
+import com.restaurant.backend.order.dto.ReorderRequest;
+import com.restaurant.backend.order.dto.ReorderResponse;
+import com.restaurant.backend.order.dto.ReorderUnavailableItemResponse;
 import com.restaurant.backend.order.repository.OrderItemRepository;
 import com.restaurant.backend.order.repository.OrderRepository;
 import com.restaurant.backend.user.domain.User;
 import com.restaurant.backend.user.domain.UserRole;
 import com.restaurant.backend.user.repository.UserRepository;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Function;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,25 +59,11 @@ public class OrderService {
     @Transactional
     public OrderCreateResponse createOrder(OrderCreateRequest request) {
         Map<Long, Menu> menuMap = loadAndValidateMenus(request.items());
-        int totalPrice = calculateTotalPrice(request.items(), menuMap);
-
         // TODO: 인증 기능 구현 후 실제 로그인 사용자로 대체한다.
         User orderUser = resolveOrderUser();
 
         // TODO: couponCode는 쿠폰 기능 구현 전까지 nullable 입력만 허용하고 실제 할인 계산에는 반영하지 않는다.
-        Order order = orderRepository.save(Order.create(orderUser, totalPrice, OrderStatus.RECEIVED));
-
-        List<OrderItem> orderItems = request.items().stream()
-                .map(item -> OrderItem.create(
-                        order,
-                        menuMap.get(item.menuId()),
-                        item.quantity(),
-                        menuMap.get(item.menuId()).getPrice()
-                ))
-                .toList();
-
-        orderItemRepository.saveAll(orderItems);
-
+        Order order = createOrder(orderUser, request.items(), menuMap);
         return orderMapper.toOrderCreateResponse(order);
     }
 
@@ -91,6 +84,64 @@ public class OrderService {
 
         validateOrderOwnership(order, user);
         return orderMapper.toOrderDetailResponse(order);
+    }
+
+    @Transactional
+    public ReorderResponse reorder(Long orderId, Long userId, ReorderRequest request) {
+        User user = getUserById(userId);
+        Order originalOrder = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
+
+        validateOrderOwnership(originalOrder, user);
+
+        Set<Long> selectedMenuIds = extractSelectedMenuIds(request);
+        List<OrderCreateItemRequest> reorderableItems = new ArrayList<>();
+        List<ReorderUnavailableItemResponse> unavailableItems = new ArrayList<>();
+
+        for (OrderItem originalItem : originalOrder.getOrderItems()) {
+            Long menuId = originalItem.getMenu().getId();
+
+            if (!selectedMenuIds.isEmpty() && !selectedMenuIds.contains(menuId)) {
+                continue;
+            }
+
+            Menu currentMenu = originalItem.getMenu();
+            if (currentMenu.getStatus() != MenuStatus.AVAILABLE) {
+                unavailableItems.add(new ReorderUnavailableItemResponse(
+                        currentMenu.getId(),
+                        currentMenu.getName(),
+                        "현재 재주문 가능한 상태가 아닙니다."
+                ));
+                continue;
+            }
+
+            reorderableItems.add(new OrderCreateItemRequest(menuId, originalItem.getQuantity()));
+        }
+
+        if (reorderableItems.isEmpty()) {
+            throw new BusinessException(ErrorCode.REORDER_NOT_AVAILABLE);
+        }
+
+        Map<Long, Menu> menuMap = loadAndValidateMenus(reorderableItems);
+        Order newOrder = createOrder(user, reorderableItems, menuMap);
+        return orderMapper.toReorderResponse(newOrder, unavailableItems);
+    }
+
+    private Order createOrder(User orderUser, List<OrderCreateItemRequest> items, Map<Long, Menu> menuMap) {
+        int totalPrice = calculateTotalPrice(items, menuMap);
+        Order order = orderRepository.save(Order.create(orderUser, totalPrice, OrderStatus.RECEIVED));
+
+        List<OrderItem> orderItems = items.stream()
+                .map(item -> OrderItem.create(
+                        order,
+                        menuMap.get(item.menuId()),
+                        item.quantity(),
+                        menuMap.get(item.menuId()).getPrice()
+                ))
+                .toList();
+
+        orderItemRepository.saveAll(orderItems);
+        return order;
     }
 
     private Map<Long, Menu> loadAndValidateMenus(List<OrderCreateItemRequest> items) {
@@ -129,6 +180,16 @@ public class OrderService {
         }
 
         return totalPrice;
+    }
+
+    private Set<Long> extractSelectedMenuIds(ReorderRequest request) {
+        if (request == null || request.menuIds() == null) {
+            return Set.of();
+        }
+
+        return request.menuIds().stream()
+                .filter(Objects::nonNull)
+                .collect(java.util.stream.Collectors.toCollection(HashSet::new));
     }
 
     private User resolveOrderUser() {

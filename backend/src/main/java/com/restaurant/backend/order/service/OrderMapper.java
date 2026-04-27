@@ -6,6 +6,8 @@ import com.restaurant.backend.order.dto.OrderCreateResponse;
 import com.restaurant.backend.order.dto.OrderDetailItemResponse;
 import com.restaurant.backend.order.dto.OrderDetailResponse;
 import com.restaurant.backend.order.dto.OrderListResponse;
+import com.restaurant.backend.order.dto.ReorderResponse;
+import com.restaurant.backend.order.dto.ReorderUnavailableItemResponse;
 import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -15,6 +17,10 @@ public class OrderMapper {
 
     public OrderCreateResponse toOrderCreateResponse(Order order) {
         return new OrderCreateResponse(order.getId(), order.getStatus(), order.getTotalPrice());
+    }
+
+    public ReorderResponse toReorderResponse(Order order, List<ReorderUnavailableItemResponse> unavailableItems) {
+        return new ReorderResponse(order.getId(), order.getStatus(), order.getTotalPrice(), unavailableItems);
     }
 
     public OrderListResponse toOrderListResponse(Order order) {

@@ -5,6 +5,8 @@ import com.restaurant.backend.order.dto.OrderCreateRequest;
 import com.restaurant.backend.order.dto.OrderCreateResponse;
 import com.restaurant.backend.order.dto.OrderDetailResponse;
 import com.restaurant.backend.order.dto.OrderListResponse;
+import com.restaurant.backend.order.dto.ReorderRequest;
+import com.restaurant.backend.order.dto.ReorderResponse;
 import com.restaurant.backend.order.service.OrderService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -44,5 +46,15 @@ public class OrderController {
     ) {
         // TODO: 인증 기능 구현 후 userId 요청 파라미터 대신 JWT 기반 사용자 식별로 대체한다.
         return ApiResponse.success(orderService.getOrder(orderId, userId));
+    }
+
+    @PostMapping("/{orderId}/reorder")
+    public ApiResponse<ReorderResponse> reorder(
+            @PathVariable Long orderId,
+            @RequestParam Long userId,
+            @Valid @RequestBody(required = false) ReorderRequest request
+    ) {
+        // TODO: 인증 기능 구현 후 userId 요청 파라미터 대신 JWT 기반 사용자 식별로 대체한다.
+        return ApiResponse.success("재주문이 생성되었습니다.", orderService.reorder(orderId, userId, request));
     }
 }
