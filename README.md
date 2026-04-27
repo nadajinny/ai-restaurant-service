@@ -50,8 +50,30 @@ AI 기반 식당 서비스 시스템 프로젝트다. 현재는 요구명세서�
 - 일관된 API 응답용 `ApiResponse`
 - `ErrorCode`
 - `BusinessException`
-- `ErrorResponse`
 - `GlobalExceptionHandler`
+- `HealthController`
+
+## 공통 응답 형식
+
+성공 응답 예시
+
+```json
+{
+  "success": true,
+  "message": "요청이 성공했습니다.",
+  "data": {}
+}
+```
+
+실패 응답 예시
+
+```json
+{
+  "success": false,
+  "message": "요청한 리소스를 찾을 수 없습니다.",
+  "errorCode": "RESOURCE_NOT_FOUND"
+}
+```
 
 ## 백엔드 실행 방법
 
@@ -66,10 +88,17 @@ cd backend
 
 예시 엔드포인트
 
+- `GET /api/v1/health`
 - `GET /api/v1/users/sample`
 - `GET /api/v1/menus/sample`
 - `GET /api/v1/orders/sample`
 - `POST /api/v1/ai/recommendations/mock`
+
+헬스 체크 예시
+
+```bash
+curl http://localhost:8080/api/v1/health
+```
 
 AI 추천 Mock 요청 예시
 
