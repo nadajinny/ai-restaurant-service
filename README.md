@@ -96,11 +96,11 @@ cd backend
 - `GET /menus?category=KOREAN`
 - `GET /menus?minPrice=8000&maxPrice=12000&status=AVAILABLE&sort=PRICE_ASC`
 - `GET /menus/{menuId}`
+- `POST /orders`
 - `POST /admin/menus`
 - `PUT /admin/menus/{menuId}`
 - `DELETE /admin/menus/{menuId}`
 - `PATCH /admin/menus/{menuId}/status`
-- `GET /api/v1/orders/sample`
 - `POST /api/v1/ai/recommendations/mock`
 
 헬스 체크 예시
@@ -139,6 +139,20 @@ curl -X POST http://localhost:8080/admin/menus \
     "imageUrl": "https://example.com/fried-rice.jpg",
     "cookingTime": 12,
     "status": "AVAILABLE"
+  }'
+```
+
+주문 생성 예시
+
+```bash
+curl -X POST http://localhost:8080/orders \
+  -H "Content-Type: application/json" \
+  -d '{
+    "items": [
+      { "menuId": 1, "quantity": 2 },
+      { "menuId": 3, "quantity": 1 }
+    ],
+    "couponCode": "WELCOME10"
   }'
 ```
 

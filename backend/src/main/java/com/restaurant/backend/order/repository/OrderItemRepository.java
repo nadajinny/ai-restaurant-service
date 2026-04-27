@@ -6,4 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
 
     boolean existsByMenu_Id(Long menuId);
+
+    long countByOrder_Id(Long orderId);
 }
