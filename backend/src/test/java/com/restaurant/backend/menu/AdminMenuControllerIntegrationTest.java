@@ -19,6 +19,7 @@ import com.restaurant.backend.order.domain.OrderStatus;
 import com.restaurant.backend.order.repository.OrderItemRepository;
 import com.restaurant.backend.order.repository.OrderRepository;
 import com.restaurant.backend.order.repository.OrderStatusHistoryRepository;
+import com.restaurant.backend.payment.repository.PaymentRepository;
 import com.restaurant.backend.review.repository.ReviewRepository;
 import com.restaurant.backend.favorite.repository.FavoriteRepository;
 import com.restaurant.backend.user.domain.User;
@@ -66,6 +67,9 @@ class AdminMenuControllerIntegrationTest {
     @Autowired
     private InventoryRepository inventoryRepository;
 
+    @Autowired
+    private PaymentRepository paymentRepository;
+
     @BeforeEach
     void setUp() {
         notificationRepository.deleteAll();
@@ -73,6 +77,7 @@ class AdminMenuControllerIntegrationTest {
         reviewRepository.deleteAll();
         orderItemRepository.deleteAll();
         favoriteRepository.deleteAll();
+        paymentRepository.deleteAll();
         orderRepository.deleteAll();
         inventoryRepository.deleteAll();
         userRepository.deleteAll();

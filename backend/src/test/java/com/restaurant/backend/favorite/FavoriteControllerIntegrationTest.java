@@ -12,6 +12,11 @@ import com.restaurant.backend.inventory.repository.InventoryRepository;
 import com.restaurant.backend.menu.domain.Menu;
 import com.restaurant.backend.menu.domain.MenuStatus;
 import com.restaurant.backend.menu.repository.MenuRepository;
+import com.restaurant.backend.notification.repository.NotificationRepository;
+import com.restaurant.backend.order.repository.OrderItemRepository;
+import com.restaurant.backend.order.repository.OrderRepository;
+import com.restaurant.backend.order.repository.OrderStatusHistoryRepository;
+import com.restaurant.backend.payment.repository.PaymentRepository;
 import com.restaurant.backend.review.repository.ReviewRepository;
 import com.restaurant.backend.user.domain.User;
 import com.restaurant.backend.user.domain.UserRole;
@@ -46,14 +51,34 @@ class FavoriteControllerIntegrationTest {
     @Autowired
     private InventoryRepository inventoryRepository;
 
+    @Autowired
+    private PaymentRepository paymentRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
+
+    @Autowired
+    private OrderStatusHistoryRepository orderStatusHistoryRepository;
+
+    @Autowired
+    private OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
     private Long userId;
     private Long availableMenuId;
     private Long soldOutMenuId;
 
     @BeforeEach
     void setUp() {
+        notificationRepository.deleteAll();
+        orderStatusHistoryRepository.deleteAll();
         favoriteRepository.deleteAll();
         reviewRepository.deleteAll();
+        orderItemRepository.deleteAll();
+        paymentRepository.deleteAll();
+        orderRepository.deleteAll();
         inventoryRepository.deleteAll();
         userRepository.deleteAll();
         menuRepository.deleteAll();

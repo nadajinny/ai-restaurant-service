@@ -113,6 +113,9 @@ cd backend
 - `PUT /admin/inventories/{menuId}`
 - `PATCH /admin/inventories/{menuId}/sold-out`
 - `PATCH /admin/inventories/{menuId}/available`
+- `POST /payments`
+- `GET /payments/{paymentId}`
+- `POST /payments/{paymentId}/cancel`
 - `PATCH /admin/orders/{orderId}/status`
 - `POST /admin/menus`
 - `PUT /admin/menus/{menuId}`
@@ -258,6 +261,27 @@ curl -X PATCH "http://localhost:8080/admin/inventories/1/sold-out"
 curl -X PATCH "http://localhost:8080/admin/inventories/1/available"
 ```
 
+결제 예시
+
+```bash
+curl -X POST "http://localhost:8080/payments" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "orderId": 1,
+    "mockResult": "APPROVED"
+  }'
+
+curl -X POST "http://localhost:8080/payments" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "orderId": 2,
+    "mockResult": "FAILED"
+  }'
+
+curl "http://localhost:8080/payments/1"
+curl -X POST "http://localhost:8080/payments/1/cancel"
+```
+
 ## 테스트 방법
 
 ```bash
@@ -265,4 +289,4 @@ cd backend
 ./gradlew test
 ```
 
-현재는 메뉴 조회/관리, 주문 생성/조회/재주문/상태 변경, 재고 관리, 즐겨찾기, 리뷰 기능까지 포함한 기본 백엔드 흐름이 구현되어 있으며, 인증과 AI 고도화는 이후 단계에서 확장할 수 있다.
+현재는 메뉴 조회/관리, 주문 생성/조회/재주문/상태 변경, 재고 관리, Mock 결제, 즐겨찾기, 리뷰 기능까지 포함한 기본 백엔드 흐름이 구현되어 있으며, 인증과 AI 고도화는 이후 단계에서 확장할 수 있다.

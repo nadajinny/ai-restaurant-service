@@ -18,6 +18,7 @@ import com.restaurant.backend.order.domain.OrderItem;
 import com.restaurant.backend.order.domain.OrderStatus;
 import com.restaurant.backend.order.repository.OrderItemRepository;
 import com.restaurant.backend.order.repository.OrderRepository;
+import com.restaurant.backend.payment.repository.PaymentRepository;
 import com.restaurant.backend.review.domain.Review;
 import com.restaurant.backend.review.domain.ReviewStatus;
 import com.restaurant.backend.review.repository.ReviewRepository;
@@ -57,6 +58,9 @@ class ReviewControllerIntegrationTest {
     @Autowired
     private InventoryRepository inventoryRepository;
 
+    @Autowired
+    private PaymentRepository paymentRepository;
+
     private Long userId;
     private Long anotherUserId;
     private Long menuId;
@@ -68,6 +72,7 @@ class ReviewControllerIntegrationTest {
     void setUp() {
         reviewRepository.deleteAll();
         orderItemRepository.deleteAll();
+        paymentRepository.deleteAll();
         orderRepository.deleteAll();
         inventoryRepository.deleteAll();
         userRepository.deleteAll();

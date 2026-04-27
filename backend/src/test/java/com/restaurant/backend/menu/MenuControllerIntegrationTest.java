@@ -12,6 +12,7 @@ import com.restaurant.backend.notification.repository.NotificationRepository;
 import com.restaurant.backend.order.repository.OrderItemRepository;
 import com.restaurant.backend.order.repository.OrderRepository;
 import com.restaurant.backend.order.repository.OrderStatusHistoryRepository;
+import com.restaurant.backend.payment.repository.PaymentRepository;
 import com.restaurant.backend.review.repository.ReviewRepository;
 import com.restaurant.backend.favorite.repository.FavoriteRepository;
 import com.restaurant.backend.user.repository.UserRepository;
@@ -56,6 +57,9 @@ class MenuControllerIntegrationTest {
     @Autowired
     private InventoryRepository inventoryRepository;
 
+    @Autowired
+    private PaymentRepository paymentRepository;
+
     private Long availableMenuId;
     private Long soldOutMenuId;
     private Long hiddenMenuId;
@@ -67,6 +71,7 @@ class MenuControllerIntegrationTest {
         reviewRepository.deleteAll();
         orderItemRepository.deleteAll();
         favoriteRepository.deleteAll();
+        paymentRepository.deleteAll();
         orderRepository.deleteAll();
         inventoryRepository.deleteAll();
         userRepository.deleteAll();

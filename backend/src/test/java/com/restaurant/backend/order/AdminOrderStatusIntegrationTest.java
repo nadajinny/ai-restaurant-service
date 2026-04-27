@@ -19,6 +19,7 @@ import com.restaurant.backend.order.domain.OrderStatusHistory;
 import com.restaurant.backend.order.repository.OrderItemRepository;
 import com.restaurant.backend.order.repository.OrderRepository;
 import com.restaurant.backend.order.repository.OrderStatusHistoryRepository;
+import com.restaurant.backend.payment.repository.PaymentRepository;
 import com.restaurant.backend.review.repository.ReviewRepository;
 import com.restaurant.backend.favorite.repository.FavoriteRepository;
 import com.restaurant.backend.user.domain.User;
@@ -67,6 +68,9 @@ class AdminOrderStatusIntegrationTest {
     @Autowired
     private InventoryRepository inventoryRepository;
 
+    @Autowired
+    private PaymentRepository paymentRepository;
+
     private Long orderId;
     private Long userId;
     private Long menuId;
@@ -78,6 +82,7 @@ class AdminOrderStatusIntegrationTest {
         reviewRepository.deleteAll();
         orderItemRepository.deleteAll();
         favoriteRepository.deleteAll();
+        paymentRepository.deleteAll();
         orderRepository.deleteAll();
         inventoryRepository.deleteAll();
         userRepository.deleteAll();

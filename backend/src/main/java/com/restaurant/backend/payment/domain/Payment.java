@@ -29,6 +29,26 @@ public class Payment extends BaseEntity {
     protected Payment() {
     }
 
+    public static Payment create(Order order, Integer amount, PaymentStatus status) {
+        Payment payment = new Payment();
+        payment.order = order;
+        payment.amount = amount;
+        payment.status = status;
+        return payment;
+    }
+
+    public void approve() {
+        this.status = PaymentStatus.APPROVED;
+    }
+
+    public void fail() {
+        this.status = PaymentStatus.FAILED;
+    }
+
+    public void cancel() {
+        this.status = PaymentStatus.CANCELED;
+    }
+
     public Order getOrder() {
         return order;
     }
