@@ -99,6 +99,7 @@ cd backend
 - `GET /orders?userId=1`
 - `GET /orders/{orderId}?userId=1`
 - `POST /orders`
+- `PATCH /admin/orders/{orderId}/status`
 - `POST /admin/menus`
 - `PUT /admin/menus/{menuId}`
 - `DELETE /admin/menus/{menuId}`
@@ -163,6 +164,16 @@ curl -X POST http://localhost:8080/orders \
 ```bash
 curl "http://localhost:8080/orders?userId=1"
 curl "http://localhost:8080/orders/1?userId=1"
+```
+
+주문 상태 변경 예시
+
+```bash
+curl -X PATCH http://localhost:8080/admin/orders/1/status \
+  -H "Content-Type: application/json" \
+  -d '{
+    "status": "COOKING"
+  }'
 ```
 
 ## 테스트 방법

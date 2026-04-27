@@ -32,6 +32,20 @@ public class OrderStatusHistory extends BaseEntity {
     protected OrderStatusHistory() {
     }
 
+    public static OrderStatusHistory create(
+            Order order,
+            OrderStatus fromStatus,
+            OrderStatus toStatus,
+            String changedBy
+    ) {
+        OrderStatusHistory history = new OrderStatusHistory();
+        history.order = order;
+        history.fromStatus = fromStatus;
+        history.toStatus = toStatus;
+        history.changedBy = changedBy;
+        return history;
+    }
+
     public Order getOrder() {
         return order;
     }

@@ -29,6 +29,15 @@ public class Notification extends BaseEntity {
     protected Notification() {
     }
 
+    public static Notification create(User user, String type, String content) {
+        Notification notification = new Notification();
+        notification.user = user;
+        notification.type = type;
+        notification.content = content;
+        notification.read = false;
+        return notification;
+    }
+
     public User getUser() {
         return user;
     }

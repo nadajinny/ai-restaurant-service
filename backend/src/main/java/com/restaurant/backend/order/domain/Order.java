@@ -55,6 +55,19 @@ public class Order extends BaseEntity {
         return order;
     }
 
+    public boolean canTransitionTo(OrderStatus nextStatus) {
+        return switch (status) {
+            case RECEIVED -> nextStatus == OrderStatus.COOKING || nextStatus == OrderStatus.CANCELED;
+            case COOKING -> nextStatus == OrderStatus.READY;
+            case READY -> nextStatus == OrderStatus.COMPLETED;
+            case COMPLETED, CANCELED -> false;
+        };
+    }
+
+    public void changeStatus(OrderStatus nextStatus) {
+        this.status = nextStatus;
+    }
+
     public User getUser() {
         return user;
     }

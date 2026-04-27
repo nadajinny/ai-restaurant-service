@@ -7,11 +7,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.restaurant.backend.menu.domain.Menu;
 import com.restaurant.backend.menu.domain.MenuStatus;
 import com.restaurant.backend.menu.repository.MenuRepository;
+import com.restaurant.backend.notification.repository.NotificationRepository;
 import com.restaurant.backend.order.domain.Order;
 import com.restaurant.backend.order.domain.OrderItem;
 import com.restaurant.backend.order.domain.OrderStatus;
 import com.restaurant.backend.order.repository.OrderItemRepository;
 import com.restaurant.backend.order.repository.OrderRepository;
+import com.restaurant.backend.order.repository.OrderStatusHistoryRepository;
 import com.restaurant.backend.user.domain.User;
 import com.restaurant.backend.user.domain.UserRole;
 import com.restaurant.backend.user.repository.UserRepository;
@@ -41,6 +43,12 @@ class OrderQueryIntegrationTest {
     @Autowired
     private MenuRepository menuRepository;
 
+    @Autowired
+    private OrderStatusHistoryRepository orderStatusHistoryRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
+
     private Long userId;
     private Long otherUserId;
     private Long latestOrderId;
@@ -48,6 +56,8 @@ class OrderQueryIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        notificationRepository.deleteAll();
+        orderStatusHistoryRepository.deleteAll();
         orderItemRepository.deleteAll();
         orderRepository.deleteAll();
         userRepository.deleteAll();

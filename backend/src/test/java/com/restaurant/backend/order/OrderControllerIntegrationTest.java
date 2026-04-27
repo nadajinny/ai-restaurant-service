@@ -8,10 +8,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.restaurant.backend.menu.domain.Menu;
 import com.restaurant.backend.menu.domain.MenuStatus;
 import com.restaurant.backend.menu.repository.MenuRepository;
+import com.restaurant.backend.notification.repository.NotificationRepository;
 import com.restaurant.backend.order.domain.Order;
 import com.restaurant.backend.order.domain.OrderStatus;
 import com.restaurant.backend.order.repository.OrderItemRepository;
 import com.restaurant.backend.order.repository.OrderRepository;
+import com.restaurant.backend.order.repository.OrderStatusHistoryRepository;
 import com.restaurant.backend.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,12 +42,20 @@ class OrderControllerIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private OrderStatusHistoryRepository orderStatusHistoryRepository;
+
+    @Autowired
+    private NotificationRepository notificationRepository;
+
     private Long availableMenuId1;
     private Long availableMenuId2;
     private Long soldOutMenuId;
 
     @BeforeEach
     void setUp() {
+        notificationRepository.deleteAll();
+        orderStatusHistoryRepository.deleteAll();
         orderItemRepository.deleteAll();
         orderRepository.deleteAll();
         userRepository.deleteAll();
