@@ -1,5 +1,7 @@
 package com.restaurant.backend.menu.service;
 
+import com.restaurant.backend.common.cache.CacheKeyFactory;
+import com.restaurant.backend.common.cache.CacheNames;
 import com.restaurant.backend.common.exception.BusinessException;
 import com.restaurant.backend.common.exception.ErrorCode;
 import com.restaurant.backend.menu.domain.Menu;
@@ -11,6 +13,7 @@ import com.restaurant.backend.menu.dto.MenuSortType;
 import com.restaurant.backend.menu.repository.MenuRepository;
 import com.restaurant.backend.menu.repository.MenuSpecification;
 import java.util.List;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +30,7 @@ public class MenuService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheNames.MENUS, key = "T(com.restaurant.backend.common.cache.CacheKeyFactory).menuSearch(#request)")
     public List<MenuListResponse> getMenus(MenuSearchRequest request) {
         validateSearchRequest(request);
 
@@ -41,6 +45,7 @@ public class MenuService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheNames.MENU_DETAILS, key = "#menuId")
     public MenuDetailResponse getMenu(Long menuId) {
         Menu menu = menuRepository.findByIdAndStatusNot(menuId, MenuStatus.HIDDEN)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENU_NOT_FOUND));

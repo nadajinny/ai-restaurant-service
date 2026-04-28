@@ -1,5 +1,6 @@
 package com.restaurant.backend.favorite.service;
 
+import com.restaurant.backend.common.cache.CacheInvalidationService;
 import com.restaurant.backend.common.exception.BusinessException;
 import com.restaurant.backend.common.exception.ErrorCode;
 import com.restaurant.backend.favorite.domain.Favorite;
@@ -21,17 +22,20 @@ public class FavoriteService {
     private final MenuRepository menuRepository;
     private final UserRepository userRepository;
     private final FavoriteMapper favoriteMapper;
+    private final CacheInvalidationService cacheInvalidationService;
 
     public FavoriteService(
             FavoriteRepository favoriteRepository,
             MenuRepository menuRepository,
             UserRepository userRepository,
-            FavoriteMapper favoriteMapper
+            FavoriteMapper favoriteMapper,
+            CacheInvalidationService cacheInvalidationService
     ) {
         this.favoriteRepository = favoriteRepository;
         this.menuRepository = menuRepository;
         this.userRepository = userRepository;
         this.favoriteMapper = favoriteMapper;
+        this.cacheInvalidationService = cacheInvalidationService;
     }
 
     @Transactional
@@ -43,6 +47,7 @@ public class FavoriteService {
         Favorite favorite = favoriteRepository.findByUser_IdAndMenu_Id(userId, request.menuId())
                 .orElseGet(() -> favoriteRepository.save(Favorite.create(user, menu)));
 
+        cacheInvalidationService.evictUserPersonalizedRecommendations(userId);
         return favoriteMapper.toFavoriteResponse(favorite);
     }
 
@@ -63,6 +68,7 @@ public class FavoriteService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.FAVORITE_NOT_FOUND));
 
         favoriteRepository.delete(favorite);
+        cacheInvalidationService.evictUserPersonalizedRecommendations(userId);
     }
 
     private User getUserById(Long userId) {

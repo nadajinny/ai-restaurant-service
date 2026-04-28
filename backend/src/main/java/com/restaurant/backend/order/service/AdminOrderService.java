@@ -1,5 +1,6 @@
 package com.restaurant.backend.order.service;
 
+import com.restaurant.backend.common.cache.CacheInvalidationService;
 import com.restaurant.backend.common.exception.BusinessException;
 import com.restaurant.backend.common.exception.ErrorCode;
 import com.restaurant.backend.inventory.service.InventoryService;
@@ -23,17 +24,20 @@ public class AdminOrderService {
     private final OrderStatusHistoryRepository orderStatusHistoryRepository;
     private final NotificationService notificationService;
     private final InventoryService inventoryService;
+    private final CacheInvalidationService cacheInvalidationService;
 
     public AdminOrderService(
             OrderRepository orderRepository,
             OrderStatusHistoryRepository orderStatusHistoryRepository,
             NotificationService notificationService,
-            InventoryService inventoryService
+            InventoryService inventoryService,
+            CacheInvalidationService cacheInvalidationService
     ) {
         this.orderRepository = orderRepository;
         this.orderStatusHistoryRepository = orderStatusHistoryRepository;
         this.notificationService = notificationService;
         this.inventoryService = inventoryService;
+        this.cacheInvalidationService = cacheInvalidationService;
     }
 
     @Transactional
@@ -61,6 +65,8 @@ public class AdminOrderService {
         );
 
         notificationService.createOrderStatusNotification(order, nextStatus);
+        cacheInvalidationService.evictAnalyticsCaches();
+        cacheInvalidationService.evictUserPersonalizedRecommendations(order.getUser().getId());
 
         return new AdminOrderStatusUpdateResponse(order.getId(), order.getStatus());
     }

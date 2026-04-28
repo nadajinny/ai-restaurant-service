@@ -1,5 +1,6 @@
 package com.restaurant.backend.payment.service;
 
+import com.restaurant.backend.common.cache.CacheInvalidationService;
 import com.restaurant.backend.common.exception.BusinessException;
 import com.restaurant.backend.common.exception.ErrorCode;
 import com.restaurant.backend.inventory.service.InventoryService;
@@ -28,6 +29,7 @@ public class PaymentService {
     private final InventoryService inventoryService;
     private final NotificationService notificationService;
     private final MockPaymentGateway mockPaymentGateway;
+    private final CacheInvalidationService cacheInvalidationService;
 
     public PaymentService(
             PaymentRepository paymentRepository,
@@ -35,7 +37,8 @@ public class PaymentService {
             OrderStatusHistoryRepository orderStatusHistoryRepository,
             InventoryService inventoryService,
             NotificationService notificationService,
-            MockPaymentGateway mockPaymentGateway
+            MockPaymentGateway mockPaymentGateway,
+            CacheInvalidationService cacheInvalidationService
     ) {
         this.paymentRepository = paymentRepository;
         this.orderRepository = orderRepository;
@@ -43,6 +46,7 @@ public class PaymentService {
         this.inventoryService = inventoryService;
         this.notificationService = notificationService;
         this.mockPaymentGateway = mockPaymentGateway;
+        this.cacheInvalidationService = cacheInvalidationService;
     }
 
     @Transactional
@@ -61,6 +65,8 @@ public class PaymentService {
         payment.fail();
         notificationService.createPaymentFailedNotification(order);
         cancelOrderForPaymentFailure(order);
+        cacheInvalidationService.evictAnalyticsCaches();
+        cacheInvalidationService.evictUserPersonalizedRecommendations(order.getUser().getId());
         return toResponse(payment);
     }
 
@@ -91,6 +97,8 @@ public class PaymentService {
             cancelOrder(order);
         }
 
+        cacheInvalidationService.evictAnalyticsCaches();
+        cacheInvalidationService.evictUserPersonalizedRecommendations(order.getUser().getId());
         return toResponse(payment);
     }
 

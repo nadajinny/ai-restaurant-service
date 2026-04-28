@@ -1,5 +1,6 @@
 package com.restaurant.backend.review.service;
 
+import com.restaurant.backend.common.cache.CacheInvalidationService;
 import com.restaurant.backend.common.exception.BusinessException;
 import com.restaurant.backend.common.exception.ErrorCode;
 import com.restaurant.backend.menu.domain.Menu;
@@ -28,19 +29,22 @@ public class ReviewService {
     private final OrderRepository orderRepository;
     private final MenuRepository menuRepository;
     private final ReviewMapper reviewMapper;
+    private final CacheInvalidationService cacheInvalidationService;
 
     public ReviewService(
             ReviewRepository reviewRepository,
             UserRepository userRepository,
             OrderRepository orderRepository,
             MenuRepository menuRepository,
-            ReviewMapper reviewMapper
+            ReviewMapper reviewMapper,
+            CacheInvalidationService cacheInvalidationService
     ) {
         this.reviewRepository = reviewRepository;
         this.userRepository = userRepository;
         this.orderRepository = orderRepository;
         this.menuRepository = menuRepository;
         this.reviewMapper = reviewMapper;
+        this.cacheInvalidationService = cacheInvalidationService;
     }
 
     @Transactional
@@ -63,6 +67,8 @@ public class ReviewService {
                 ReviewStatus.ACTIVE
         ));
 
+        cacheInvalidationService.evictReviewRelatedCaches(menu.getId());
+        cacheInvalidationService.evictUserPersonalizedRecommendations(userId);
         return reviewMapper.toReviewResponse(review);
     }
 
@@ -84,6 +90,8 @@ public class ReviewService {
         validateReviewNotDeleted(review);
 
         review.update(request.content(), request.rating(), request.aiGenerated());
+        cacheInvalidationService.evictReviewRelatedCaches(review.getMenu().getId());
+        cacheInvalidationService.evictUserPersonalizedRecommendations(userId);
         return reviewMapper.toReviewResponse(review);
     }
 
@@ -95,6 +103,8 @@ public class ReviewService {
         validateReviewOwnership(review, user);
         validateReviewNotDeleted(review);
         review.delete();
+        cacheInvalidationService.evictReviewRelatedCaches(review.getMenu().getId());
+        cacheInvalidationService.evictUserPersonalizedRecommendations(userId);
     }
 
     @Transactional(readOnly = true)
@@ -114,6 +124,7 @@ public class ReviewService {
         }
 
         review.hide();
+        cacheInvalidationService.evictReviewRelatedCaches(review.getMenu().getId());
         return reviewMapper.toReviewResponse(review);
     }
 

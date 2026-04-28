@@ -97,6 +97,15 @@ cd backend
 
 기본 데이터베이스는 SQLite이며, 실행 시 `backend/restaurant.db` 파일이 생성될 수 있다.
 
+Redis 캐시는 기본적으로 `localhost:6379`를 사용한다. Redis가 없더라도 서버가 완전히 죽지 않도록 메모리 캐시 fallback이 적용되어 있다.
+
+로컬에서 Redis 없이 실행하려면 다음처럼 비활성화할 수 있다.
+
+```bash
+cd backend
+CACHE_REDIS_ENABLED=false ./gradlew bootRun
+```
+
 ## AI 서버 실행 방법
 
 Python 3.11 이상을 권장한다.
@@ -207,6 +216,15 @@ curl -X POST "http://localhost:8080/ai/review-generate" \
 curl "http://localhost:8080/ai/menus/1/review-summary"
 curl "http://localhost:8080/admin/ai/new-menu-recommendations"
 ```
+
+## 캐시 전략
+
+- 전체 메뉴 목록과 카테고리/필터 기반 메뉴 목록은 10분 TTL로 캐시된다.
+- 메뉴 상세 정보는 10분 TTL로 캐시된다.
+- 인기 메뉴 목록은 30분 TTL로 캐시된다.
+- 리뷰 요약 결과는 메뉴별로 캐시되며 리뷰 작성, 수정, 삭제, 숨김 처리 시 무효화된다.
+- 개인화 추천 결과는 사용자별로 캐시되며 주문, 즐겨찾기, 리뷰 변경 시 무효화된다.
+- 관리자 대시보드와 분석 캐시는 짧은 TTL을 사용하며 주문/결제/재고/메뉴 변경 시 무효화된다.
 
 메뉴 조회 예시
 

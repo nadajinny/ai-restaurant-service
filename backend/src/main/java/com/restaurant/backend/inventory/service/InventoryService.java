@@ -1,5 +1,6 @@
 package com.restaurant.backend.inventory.service;
 
+import com.restaurant.backend.common.cache.CacheInvalidationService;
 import com.restaurant.backend.common.exception.BusinessException;
 import com.restaurant.backend.common.exception.ErrorCode;
 import com.restaurant.backend.inventory.domain.Inventory;
@@ -25,10 +26,16 @@ public class InventoryService {
 
     private final InventoryRepository inventoryRepository;
     private final MenuRepository menuRepository;
+    private final CacheInvalidationService cacheInvalidationService;
 
-    public InventoryService(InventoryRepository inventoryRepository, MenuRepository menuRepository) {
+    public InventoryService(
+            InventoryRepository inventoryRepository,
+            MenuRepository menuRepository,
+            CacheInvalidationService cacheInvalidationService
+    ) {
         this.inventoryRepository = inventoryRepository;
         this.menuRepository = menuRepository;
+        this.cacheInvalidationService = cacheInvalidationService;
     }
 
     @Transactional(readOnly = true)
@@ -54,6 +61,7 @@ public class InventoryService {
 
         inventory.updateQuantity(request.quantity());
         syncMenuStatusWithQuantity(menu, inventory.getQuantity());
+        cacheInvalidationService.evictMenuAndAnalyticsCaches(menuId);
 
         return toInventoryResponse(menu, inventory);
     }
@@ -64,6 +72,7 @@ public class InventoryService {
         Menu menu = getMenuById(menuId);
         menu.changeStatus(MenuStatus.SOLD_OUT);
         Inventory inventory = inventoryRepository.findByMenu_Id(menuId).orElse(null);
+        cacheInvalidationService.evictMenuAndAnalyticsCaches(menuId);
         return toInventoryResponse(menu, inventory);
     }
 
@@ -79,6 +88,7 @@ public class InventoryService {
         }
 
         menu.changeStatus(MenuStatus.AVAILABLE);
+        cacheInvalidationService.evictMenuAndAnalyticsCaches(menuId);
         return toInventoryResponse(menu, inventory);
     }
 
@@ -112,6 +122,8 @@ public class InventoryService {
                 menu.changeStatus(MenuStatus.SOLD_OUT);
             }
         }
+
+        requestedQuantities.keySet().forEach(cacheInvalidationService::evictMenuAndAnalyticsCaches);
     }
 
     @Transactional
@@ -126,6 +138,8 @@ public class InventoryService {
             if (menu.getStatus() == MenuStatus.SOLD_OUT) {
                 menu.changeStatus(MenuStatus.AVAILABLE);
             }
+
+            cacheInvalidationService.evictMenuAndAnalyticsCaches(menu.getId());
         }
     }
 

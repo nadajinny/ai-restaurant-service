@@ -12,6 +12,7 @@ import com.restaurant.backend.ai.dto.AiRecommendResponse;
 import com.restaurant.backend.ai.dto.AiReviewGenerateRequest;
 import com.restaurant.backend.ai.dto.AiReviewGenerateResponse;
 import com.restaurant.backend.ai.dto.AiReviewSummaryResponse;
+import com.restaurant.backend.common.cache.CacheNames;
 import com.restaurant.backend.common.exception.BusinessException;
 import com.restaurant.backend.common.exception.ErrorCode;
 import com.restaurant.backend.menu.domain.Menu;
@@ -22,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,6 +50,7 @@ public class AiService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheNames.PERSONALIZED_RECOMMENDATIONS, key = "#userId")
     public AiPersonalizedRecommendationResponse getPersonalizedRecommendations(Long userId) {
         try {
             AiPersonalizedRecommendationResponse response = aiServerClient.getPersonalizedRecommendations(userId);
@@ -95,6 +98,7 @@ public class AiService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheNames.REVIEW_SUMMARIES, key = "#menuId")
     public AiReviewSummaryResponse getReviewSummary(Long menuId) {
         Menu menu = menuRepository.findById(menuId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.MENU_NOT_FOUND));

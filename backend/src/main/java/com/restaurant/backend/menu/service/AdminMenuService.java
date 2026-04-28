@@ -1,5 +1,6 @@
 package com.restaurant.backend.menu.service;
 
+import com.restaurant.backend.common.cache.CacheInvalidationService;
 import com.restaurant.backend.common.exception.BusinessException;
 import com.restaurant.backend.common.exception.ErrorCode;
 import com.restaurant.backend.menu.domain.Menu;
@@ -17,22 +18,27 @@ public class AdminMenuService {
     private final MenuRepository menuRepository;
     private final OrderItemRepository orderItemRepository;
     private final MenuMapper menuMapper;
+    private final CacheInvalidationService cacheInvalidationService;
 
     public AdminMenuService(
             MenuRepository menuRepository,
             OrderItemRepository orderItemRepository,
-            MenuMapper menuMapper
+            MenuMapper menuMapper,
+            CacheInvalidationService cacheInvalidationService
     ) {
         this.menuRepository = menuRepository;
         this.orderItemRepository = orderItemRepository;
         this.menuMapper = menuMapper;
+        this.cacheInvalidationService = cacheInvalidationService;
     }
 
     @Transactional
     public AdminMenuResponse createMenu(AdminMenuRequest request) {
         // TODO: 관리자 권한 검증은 인증 기능 구현 후 적용한다.
         Menu menu = menuMapper.toMenu(request);
-        return menuMapper.toAdminMenuResponse(menuRepository.save(menu));
+        Menu savedMenu = menuRepository.save(menu);
+        cacheInvalidationService.evictMenuCaches(savedMenu.getId());
+        return menuMapper.toAdminMenuResponse(savedMenu);
     }
 
     @Transactional
@@ -49,6 +55,7 @@ public class AdminMenuService {
                 request.status()
         );
 
+        cacheInvalidationService.evictMenuCaches(menu.getId());
         return menuMapper.toAdminMenuResponse(menu);
     }
 
@@ -59,10 +66,12 @@ public class AdminMenuService {
 
         if (orderItemRepository.existsByMenu_Id(menuId)) {
             menu.hide();
+            cacheInvalidationService.evictMenuCaches(menu.getId());
             return;
         }
 
         menuRepository.delete(menu);
+        cacheInvalidationService.evictMenuCaches(menuId);
     }
 
     @Transactional
@@ -70,6 +79,7 @@ public class AdminMenuService {
         // TODO: 관리자 권한 검증은 인증 기능 구현 후 적용한다.
         Menu menu = getMenuById(menuId);
         menu.changeStatus(request.status());
+        cacheInvalidationService.evictMenuCaches(menu.getId());
         return menuMapper.toAdminMenuResponse(menu);
     }
 

@@ -7,6 +7,7 @@ import com.restaurant.backend.analytics.dto.PopularMenuResponse;
 import com.restaurant.backend.analytics.dto.RecentReviewResponse;
 import com.restaurant.backend.analytics.dto.SalesAnalyticsResponse;
 import com.restaurant.backend.analytics.dto.SoldOutMenuResponse;
+import com.restaurant.backend.common.cache.CacheNames;
 import com.restaurant.backend.menu.domain.Menu;
 import com.restaurant.backend.menu.domain.MenuStatus;
 import com.restaurant.backend.menu.repository.MenuRepository;
@@ -22,6 +23,7 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -43,6 +45,7 @@ public class AnalyticsService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheNames.ADMIN_DASHBOARD)
     public DashboardResponse getDashboard() {
         LocalDate today = LocalDate.now();
         List<Order> orders = orderRepository.findAll();
@@ -68,6 +71,7 @@ public class AnalyticsService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheNames.SALES_ANALYTICS)
     public SalesAnalyticsResponse getSalesAnalytics() {
         List<Order> completedOrders = orderRepository.findAll().stream()
                 .filter(order -> order.getStatus() == OrderStatus.COMPLETED)
@@ -83,6 +87,7 @@ public class AnalyticsService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheNames.POPULAR_MENUS)
     public List<PopularMenuResponse> getPopularMenus() {
         return buildMenuStats().values().stream()
                 .sorted(Comparator.comparingInt(MenuStat::soldQuantity).reversed()
@@ -99,6 +104,7 @@ public class AnalyticsService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheNames.MENU_PERFORMANCE)
     public List<MenuPerformanceResponse> getMenuPerformance() {
         return buildMenuStats().values().stream()
                 .sorted(Comparator.comparing(MenuStat::menuId))
@@ -113,6 +119,7 @@ public class AnalyticsService {
     }
 
     @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheNames.HOURLY_ORDERS)
     public List<HourlyOrderResponse> getHourlyOrders() {
         long[] hourCounts = new long[24];
 
