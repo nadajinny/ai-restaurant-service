@@ -10,8 +10,11 @@ import com.restaurant.backend.order.domain.OrderStatus;
 import com.restaurant.backend.order.domain.OrderStatusHistory;
 import com.restaurant.backend.order.dto.AdminOrderStatusUpdateRequest;
 import com.restaurant.backend.order.dto.AdminOrderStatusUpdateResponse;
+import com.restaurant.backend.order.dto.OrderDetailResponse;
+import com.restaurant.backend.order.dto.OrderListResponse;
 import com.restaurant.backend.order.repository.OrderRepository;
 import com.restaurant.backend.order.repository.OrderStatusHistoryRepository;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,19 +28,38 @@ public class AdminOrderService {
     private final NotificationService notificationService;
     private final InventoryService inventoryService;
     private final CacheInvalidationService cacheInvalidationService;
+    private final OrderMapper orderMapper;
 
     public AdminOrderService(
             OrderRepository orderRepository,
             OrderStatusHistoryRepository orderStatusHistoryRepository,
             NotificationService notificationService,
             InventoryService inventoryService,
-            CacheInvalidationService cacheInvalidationService
+            CacheInvalidationService cacheInvalidationService,
+            OrderMapper orderMapper
     ) {
         this.orderRepository = orderRepository;
         this.orderStatusHistoryRepository = orderStatusHistoryRepository;
         this.notificationService = notificationService;
         this.inventoryService = inventoryService;
         this.cacheInvalidationService = cacheInvalidationService;
+        this.orderMapper = orderMapper;
+    }
+
+    @Transactional(readOnly = true)
+    public List<OrderListResponse> getOrders() {
+        // TODO: 관리자 권한 검증은 인증 기능 구현 후 적용한다.
+        return orderRepository.findAllByOrderByCreatedAtDescIdDesc().stream()
+                .map(orderMapper::toOrderListResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public OrderDetailResponse getOrder(Long orderId) {
+        // TODO: 관리자 권한 검증은 인증 기능 구현 후 적용한다.
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
+        return orderMapper.toOrderDetailResponse(order);
     }
 
     @Transactional

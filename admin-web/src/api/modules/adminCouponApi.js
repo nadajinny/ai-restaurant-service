@@ -1,6 +1,9 @@
 import { apiRequest } from "@/api/httpClient";
 
 export const adminCouponApi = {
+  getCoupons() {
+    return apiRequest("/admin/coupons");
+  },
   createCoupon(payload) {
     return apiRequest("/admin/coupons", {
       method: "POST",

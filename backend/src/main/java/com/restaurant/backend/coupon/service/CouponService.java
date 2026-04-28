@@ -92,6 +92,15 @@ public class CouponService {
     }
 
     @Transactional(readOnly = true)
+    public List<CouponResponse> getCoupons() {
+        return couponRepository.findAll().stream()
+                .sorted(java.util.Comparator.comparing(Coupon::getCreatedAt).reversed()
+                        .thenComparing(Coupon::getId, java.util.Comparator.reverseOrder()))
+                .map(this::toCouponResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public List<AvailableCouponResponse> getAvailableCoupons() {
         LocalDateTime now = LocalDateTime.now();
 

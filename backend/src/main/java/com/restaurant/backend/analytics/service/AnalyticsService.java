@@ -8,6 +8,8 @@ import com.restaurant.backend.analytics.dto.RecentReviewResponse;
 import com.restaurant.backend.analytics.dto.SalesAnalyticsResponse;
 import com.restaurant.backend.analytics.dto.SoldOutMenuResponse;
 import com.restaurant.backend.common.cache.CacheNames;
+import com.restaurant.backend.common.exception.BusinessException;
+import com.restaurant.backend.common.exception.ErrorCode;
 import com.restaurant.backend.menu.domain.Menu;
 import com.restaurant.backend.menu.domain.MenuStatus;
 import com.restaurant.backend.menu.repository.MenuRepository;
@@ -73,8 +75,19 @@ public class AnalyticsService {
     @Transactional(readOnly = true)
     @Cacheable(cacheNames = CacheNames.SALES_ANALYTICS)
     public SalesAnalyticsResponse getSalesAnalytics() {
+        return getSalesAnalytics(null, null);
+    }
+
+    @Transactional(readOnly = true)
+    @Cacheable(cacheNames = CacheNames.SALES_ANALYTICS, key = "#startDate + ':' + #endDate")
+    public SalesAnalyticsResponse getSalesAnalytics(LocalDate startDate, LocalDate endDate) {
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "시작일은 종료일보다 늦을 수 없습니다.");
+        }
+
         List<Order> completedOrders = orderRepository.findAll().stream()
                 .filter(order -> order.getStatus() == OrderStatus.COMPLETED)
+                .filter(order -> isWithinRange(order, startDate, endDate))
                 .toList();
 
         int totalSales = completedOrders.stream()
@@ -197,5 +210,23 @@ public class AnalyticsService {
             int soldQuantity,
             int salesAmount
     ) {
+    }
+
+    private boolean isWithinRange(Order order, LocalDate startDate, LocalDate endDate) {
+        if (order.getCreatedAt() == null) {
+            return false;
+        }
+
+        LocalDate orderedDate = order.getCreatedAt().toLocalDate();
+
+        if (startDate != null && orderedDate.isBefore(startDate)) {
+            return false;
+        }
+
+        if (endDate != null && orderedDate.isAfter(endDate)) {
+            return false;
+        }
+
+        return true;
     }
 }

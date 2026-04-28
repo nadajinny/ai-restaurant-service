@@ -1,6 +1,9 @@
 import { apiRequest } from "@/api/httpClient";
 
 export const adminMenuApi = {
+  getMenus() {
+    return apiRequest("/admin/menus");
+  },
   createMenu(payload) {
     return apiRequest("/admin/menus", {
       method: "POST",

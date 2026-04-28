@@ -15,6 +15,18 @@ async function parseResponse(response) {
     throw new Error(message);
   }
 
+  if (
+    typeof body === "object" &&
+    body !== null &&
+    Object.prototype.hasOwnProperty.call(body, "success")
+  ) {
+    if (body.success === false) {
+      throw new Error(body.message ?? "요청 처리에 실패했습니다.");
+    }
+
+    return body.data;
+  }
+
   return body;
 }
 

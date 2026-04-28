@@ -5,6 +5,8 @@ import com.restaurant.backend.coupon.dto.AdminCouponRequest;
 import com.restaurant.backend.coupon.dto.CouponResponse;
 import com.restaurant.backend.coupon.service.CouponService;
 import jakarta.validation.Valid;
+import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +23,11 @@ public class AdminCouponController {
 
     public AdminCouponController(CouponService couponService) {
         this.couponService = couponService;
+    }
+
+    @GetMapping
+    public ApiResponse<List<CouponResponse>> getCoupons() {
+        return ApiResponse.success(couponService.getCoupons());
     }
 
     @PostMapping

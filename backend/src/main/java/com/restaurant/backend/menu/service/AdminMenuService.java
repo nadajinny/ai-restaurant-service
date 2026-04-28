@@ -9,6 +9,7 @@ import com.restaurant.backend.menu.dto.AdminMenuResponse;
 import com.restaurant.backend.menu.dto.AdminMenuStatusUpdateRequest;
 import com.restaurant.backend.menu.repository.MenuRepository;
 import com.restaurant.backend.order.repository.OrderItemRepository;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -39,6 +40,14 @@ public class AdminMenuService {
         Menu savedMenu = menuRepository.save(menu);
         cacheInvalidationService.evictMenuCaches(savedMenu.getId());
         return menuMapper.toAdminMenuResponse(savedMenu);
+    }
+
+    @Transactional(readOnly = true)
+    public List<AdminMenuResponse> getMenus() {
+        // TODO: 관리자 권한 검증은 인증 기능 구현 후 적용한다.
+        return menuRepository.findAllByOrderByCreatedAtDescIdDesc().stream()
+                .map(menuMapper::toAdminMenuResponse)
+                .toList();
     }
 
     @Transactional
