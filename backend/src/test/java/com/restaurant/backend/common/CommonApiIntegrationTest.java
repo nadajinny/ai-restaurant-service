@@ -38,7 +38,7 @@ class CommonApiIntegrationTest {
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.message").value("입력값이 올바르지 않습니다."))
                 .andExpect(jsonPath("$.errorCode").value("INVALID_INPUT_VALUE"))
-                .andExpect(jsonPath("$.details.message").value("message is required"));
+                .andExpect(jsonPath("$.details.message").value("message는 필수입니다."));
     }
 
     @Test

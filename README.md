@@ -179,6 +179,35 @@ curl -X POST http://localhost:8080/api/v1/ai/recommendations/mock \
   -d '{"message":"매운 음식 추천해줘"}'
 ```
 
+백엔드 AI 프록시 예시
+
+```bash
+curl -X POST "http://localhost:8080/ai/recommend" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "오늘 매운 음식이 먹고 싶어"
+  }'
+
+curl "http://localhost:8080/ai/personalized-recommendations?userId=1"
+
+curl -X POST "http://localhost:8080/ai/emotion-recommend" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "emotion": "stressed",
+    "context": "오늘 일이 많았어"
+  }'
+
+curl -X POST "http://localhost:8080/ai/review-generate" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "menuId": 1,
+    "keywords": ["맛있다", "양이 많다", "친절하다"]
+  }'
+
+curl "http://localhost:8080/ai/menus/1/review-summary"
+curl "http://localhost:8080/admin/ai/new-menu-recommendations"
+```
+
 메뉴 조회 예시
 
 ```bash
