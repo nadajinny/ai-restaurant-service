@@ -21,6 +21,18 @@ AI 기반 식당 서비스 시스템 프로젝트다. 현재는 요구명세서�
 │       ├── core
 │       ├── schemas
 │       └── services
+├── frontend
+│   ├── package.json
+│   ├── vite.config.js
+│   └── src
+│       ├── api
+│       ├── components
+│       ├── config
+│       ├── layouts
+│       ├── navigation
+│       ├── router
+│       ├── styles
+│       └── views
 └── backend
     ├── build.gradle
     ├── gradlew
@@ -96,6 +108,26 @@ cd backend
 기본 포트는 `8080`이다.
 
 기본 데이터베이스는 SQLite이며, 실행 시 `backend/restaurant.db` 파일이 생성될 수 있다.
+
+## 프론트엔드 실행 방법
+
+Node.js 20 이상을 권장한다.
+
+```bash
+cd frontend
+cp .env.example .env
+npm install
+npm run dev
+```
+
+기본 포트는 `5173`이다.
+
+프론트엔드 구조 요약
+
+- 고객용 라우트: `/`, `/menus`, `/menus/:menuId`, `/cart`, `/orders/status`, `/orders/history`, `/ai/recommend`, `/reviews/write`, `/favorites`, `/notifications`
+- 관리자용 라우트: `/admin`, `/admin/menus`, `/admin/orders`, `/admin/reviews`, `/admin/inventories`, `/admin/sales`, `/admin/coupons`, `/admin/ai/new-menus`
+- 공통 레이아웃: `src/layouts/CustomerLayout.vue`, `src/layouts/AdminLayout.vue`
+- API 클라이언트: `src/api/httpClient.js`와 `src/api/modules/*`
 
 Redis 캐시는 기본적으로 `localhost:6379`를 사용한다. Redis가 없더라도 서버가 완전히 죽지 않도록 메모리 캐시 fallback이 적용되어 있다.
 
