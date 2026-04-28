@@ -348,4 +348,96 @@ class CouponControllerIntegrationTest {
                 .andExpect(jsonPath("$.success").value(false))
                 .andExpect(jsonPath("$.errorCode").value("INVALID_INPUT_VALUE"));
     }
+
+    @Test
+    @WithMockUser(username = "coupon-user", roles = "USER")
+    void applyCouponRejectsInactiveAndExpiredCoupon() throws Exception {
+        couponRepository.save(Coupon.create(
+                "INACTIVE10",
+                "비활성 쿠폰",
+                1000,
+                null,
+                null,
+                10000,
+                LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().plusDays(1),
+                5,
+                false
+        ));
+        couponRepository.save(Coupon.create(
+                "EXPIRED10",
+                "만료 쿠폰",
+                1000,
+                null,
+                null,
+                10000,
+                LocalDateTime.now().minusDays(10),
+                LocalDateTime.now().minusDays(1),
+                5,
+                true
+        ));
+
+        mockMvc.perform(post("/coupons/apply")
+                        .param("userId", String.valueOf(userId))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "orderId": %d,
+                                  "couponCode": "INACTIVE10"
+                                }
+                                """.formatted(orderId)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.errorCode").value("INVALID_INPUT_VALUE"));
+
+        mockMvc.perform(post("/coupons/apply")
+                        .param("userId", String.valueOf(userId))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "orderId": %d,
+                                  "couponCode": "EXPIRED10"
+                                }
+                                """.formatted(orderId)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.errorCode").value("INVALID_INPUT_VALUE"));
+    }
+
+    @Test
+    @WithMockUser(username = "coupon-user", roles = "USER")
+    void applyCouponRejectsWhenAvailableCountIsExhausted() throws Exception {
+        Coupon exhaustedCoupon = couponRepository.save(Coupon.create(
+                "LIMIT1",
+                "1회 한정 쿠폰",
+                1000,
+                null,
+                null,
+                10000,
+                LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().plusDays(1),
+                1,
+                true
+        ));
+
+        couponUsageRepository.save(com.restaurant.backend.coupon.domain.CouponUsage.create(
+                exhaustedCoupon,
+                userRepository.findById(anotherUserId).orElseThrow(),
+                orderRepository.findById(anotherOrderId).orElseThrow(),
+                1000
+        ));
+
+        mockMvc.perform(post("/coupons/apply")
+                        .param("userId", String.valueOf(userId))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "orderId": %d,
+                                  "couponCode": "LIMIT1"
+                                }
+                                """.formatted(orderId)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.errorCode").value("INVALID_INPUT_VALUE"));
+    }
 }
