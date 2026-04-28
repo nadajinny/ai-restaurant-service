@@ -1,0 +1,239 @@
+:root {
+  color-scheme: light;
+  font-family: "Pretendard", "Noto Sans KR", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #14261f;
+  background:
+    radial-gradient(circle at top left, rgba(255, 209, 102, 0.45), transparent 32%),
+    radial-gradient(circle at top right, rgba(24, 160, 251, 0.18), transparent 28%),
+    linear-gradient(180deg, #f9f3e8 0%, #f4efe6 38%, #eef4ef 100%);
+  --surface: rgba(255, 255, 255, 0.76);
+  --surface-strong: rgba(255, 255, 255, 0.92);
+  --border: rgba(20, 38, 31, 0.12);
+  --text-soft: #53645e;
+  --customer-accent: #d35400;
+  --admin-accent: #0f766e;
+  --shadow: 0 22px 44px rgba(24, 36, 32, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.app-shell__sidebar {
+  position: sticky;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 100vh;
+  padding: 2rem 1.5rem;
+  backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.6);
+  border-right: 1px solid var(--border);
+}
+
+.app-shell[data-theme="admin"] .app-shell__sidebar {
+  background: rgba(234, 248, 244, 0.78);
+}
+
+.app-shell__brand {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.app-shell__brand-kicker,
+.layout-kicker,
+.page-hero__badge {
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-soft);
+}
+
+.app-shell__brand strong,
+.layout-title,
+.page-hero__title,
+.page-panel__title {
+  font-family: "SUIT", "Pretendard", sans-serif;
+  letter-spacing: -0.03em;
+}
+
+.app-shell__brand strong {
+  font-size: 1.7rem;
+}
+
+.app-shell__subtitle {
+  margin: 0;
+  color: var(--text-soft);
+}
+
+.app-shell__nav {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 1rem;
+}
+
+.app-shell__nav-link {
+  padding: 0.85rem 1rem;
+  border-radius: 18px;
+  background: transparent;
+  border: 1px solid transparent;
+  transition: 0.2s ease;
+}
+
+.app-shell__nav-link.router-link-active {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--border);
+  box-shadow: var(--shadow);
+}
+
+.app-shell[data-theme="customer"] .app-shell__nav-link.router-link-active {
+  color: var(--customer-accent);
+}
+
+.app-shell[data-theme="admin"] .app-shell__nav-link.router-link-active {
+  color: var(--admin-accent);
+}
+
+.app-shell__main {
+  padding: 2rem;
+}
+
+.app-shell__header {
+  margin-bottom: 1.5rem;
+}
+
+.layout-title {
+  margin: 0.2rem 0 0;
+  font-size: clamp(2rem, 2.8vw, 3rem);
+}
+
+.app-shell__content,
+.page-stack {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.page-hero,
+.page-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(14px);
+}
+
+.page-hero {
+  padding: 2rem;
+}
+
+.page-hero__title {
+  margin: 0.4rem 0 0.5rem;
+  font-size: clamp(2rem, 3vw, 3.4rem);
+}
+
+.page-hero__description,
+.page-panel__description {
+  margin: 0;
+  color: var(--text-soft);
+}
+
+.page-panel {
+  padding: 1.5rem;
+}
+
+.page-panel__header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.page-panel__title {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.page-panel__endpoint {
+  padding: 0.45rem 0.75rem;
+  border-radius: 999px;
+  background: #11211c;
+  color: #f4f8f6;
+}
+
+.screen-blueprint {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.screen-blueprint__card {
+  padding: 1.15rem;
+  border-radius: 20px;
+  background: var(--surface-strong);
+  border: 1px solid var(--border);
+}
+
+.screen-blueprint__card h3 {
+  margin: 0 0 0.4rem;
+}
+
+.screen-blueprint__card p {
+  margin: 0 0 0.75rem;
+  color: var(--text-soft);
+}
+
+.screen-blueprint__card ul,
+.bullet-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+@media (max-width: 960px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .app-shell__sidebar {
+    position: static;
+    min-height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .app-shell__main {
+    padding: 1rem;
+  }
+}
