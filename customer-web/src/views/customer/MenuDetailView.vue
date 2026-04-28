@@ -1,19 +1,29 @@
 <script setup>
-import { menuApi } from "@/api";
+import { favoriteApi, menuApi, reviewApi } from "@/api";
 import PageHero from "@/components/PageHero.vue";
 import PagePanel from "@/components/PagePanel.vue";
+import { useCurrentUser } from "@/composables/useCurrentUser";
 import { useCart } from "@/composables/useCart";
 import { formatCurrency } from "@/utils/format";
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
+const { ensureCurrentUser } = useCurrentUser();
 const { addItem, totalQuantity } = useCart();
 
 const menu = ref(null);
+const reviews = ref([]);
+const favoriteMenuIds = ref([]);
 const loading = ref(false);
+const reviewLoading = ref(false);
+const favoriteLoading = ref(false);
 const errorMessage = ref("");
 const feedbackMessage = ref("");
+
+const isFavorite = computed(() =>
+  menu.value ? favoriteMenuIds.value.includes(menu.value.menuId) : false,
+);
 
 async function fetchMenu() {
   loading.value = true;
@@ -28,6 +38,32 @@ async function fetchMenu() {
   }
 }
 
+async function fetchReviews() {
+  reviewLoading.value = true;
+
+  try {
+    reviews.value = await reviewApi.getMenuReviews(route.params.menuId);
+  } catch {
+    reviews.value = [];
+  } finally {
+    reviewLoading.value = false;
+  }
+}
+
+async function fetchFavorites() {
+  favoriteLoading.value = true;
+
+  try {
+    const user = await ensureCurrentUser();
+    const favorites = await favoriteApi.getFavorites(user.id);
+    favoriteMenuIds.value = favorites.map((item) => item.menuId);
+  } catch {
+    favoriteMenuIds.value = [];
+  } finally {
+    favoriteLoading.value = false;
+  }
+}
+
 function handleAddToCart() {
   if (!menu.value?.orderable) {
     feedbackMessage.value = "현재 주문할 수 없는 메뉴입니다.";
@@ -38,14 +74,51 @@ function handleAddToCart() {
   feedbackMessage.value = `${menu.value.name}을(를) 장바구니에 담았습니다.`;
 }
 
+async function toggleFavorite() {
+  if (!menu.value) {
+    return;
+  }
+
+  favoriteLoading.value = true;
+  feedbackMessage.value = "";
+
+  try {
+    const user = await ensureCurrentUser();
+
+    if (isFavorite.value) {
+      await favoriteApi.deleteFavorite(user.id, menu.value.menuId);
+      favoriteMenuIds.value = favoriteMenuIds.value.filter((id) => id !== menu.value.menuId);
+      feedbackMessage.value = "즐겨찾기를 해제했습니다.";
+    } else {
+      await favoriteApi.createFavorite(user.id, menu.value.menuId);
+      favoriteMenuIds.value = [...favoriteMenuIds.value, menu.value.menuId];
+      feedbackMessage.value = "즐겨찾기에 추가했습니다.";
+    }
+  } catch (error) {
+    feedbackMessage.value = error.message ?? "즐겨찾기 처리에 실패했습니다.";
+  } finally {
+    favoriteLoading.value = false;
+  }
+}
+
+function renderStars(rating) {
+  return "★".repeat(rating) + "☆".repeat(5 - rating);
+}
+
 watch(
   () => route.params.menuId,
   () => {
     fetchMenu();
+    fetchReviews();
+    fetchFavorites();
   },
 );
 
-onMounted(fetchMenu);
+onMounted(() => {
+  fetchMenu();
+  fetchReviews();
+  fetchFavorites();
+});
 </script>
 
 <template>
@@ -91,6 +164,14 @@ onMounted(fetchMenu);
             <router-link to="/menus" class="secondary-button">목록으로</router-link>
             <button
               type="button"
+              class="ghost-button"
+              :disabled="favoriteLoading"
+              @click="toggleFavorite"
+            >
+              {{ isFavorite ? "즐겨찾기 해제" : "즐겨찾기 추가" }}
+            </button>
+            <button
+              type="button"
               class="primary-button"
               :disabled="!menu.orderable"
               @click="handleAddToCart"
@@ -102,6 +183,28 @@ onMounted(fetchMenu);
       </div>
 
       <p v-else class="state-copy">메뉴 정보를 찾을 수 없습니다.</p>
+    </PagePanel>
+
+    <PagePanel
+      title="리뷰 목록"
+      endpoint="GET /menus/{menuId}/reviews"
+      description="메뉴 상세 화면에서 ACTIVE 상태의 리뷰만 조회합니다."
+    >
+      <p v-if="reviewLoading" class="state-copy">리뷰를 불러오는 중입니다.</p>
+      <p v-else-if="reviews.length === 0" class="state-copy">아직 작성된 리뷰가 없습니다.</p>
+
+      <div v-else class="review-list">
+        <article v-for="review in reviews" :key="review.reviewId" class="review-card">
+          <div class="review-card__header">
+            <strong>{{ renderStars(review.rating) }}</strong>
+            <span class="review-card__meta">
+              {{ new Date(review.createdAt).toLocaleDateString("ko-KR") }}
+            </span>
+          </div>
+          <p class="review-card__content">{{ review.content }}</p>
+          <span v-if="review.aiGenerated" class="review-badge">AI 초안 사용</span>
+        </article>
+      </div>
     </PagePanel>
   </div>
 </template>

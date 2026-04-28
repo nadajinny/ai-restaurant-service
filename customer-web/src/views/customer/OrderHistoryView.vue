@@ -204,7 +204,15 @@ onMounted(fetchOrders);
                     <p class="menu-card__category">{{ item.menuName }}</p>
                     <h3>{{ item.quantity }}개</h3>
                   </div>
-                  <strong>{{ formatCurrency(item.itemPrice * item.quantity) }}원</strong>
+                  <div class="order-item-card__actions">
+                    <strong>{{ formatCurrency(item.itemPrice * item.quantity) }}원</strong>
+                    <router-link
+                      class="secondary-button"
+                      :to="`/reviews/write?orderId=${selectedOrder.orderId}&menuId=${item.menuId}&menuName=${encodeURIComponent(item.menuName)}`"
+                    >
+                      리뷰 작성
+                    </router-link>
+                  </div>
                 </article>
               </div>
             </div>

@@ -224,7 +224,9 @@ textarea {
 .menu-toolbar,
 .menu-grid,
 .cart-grid,
-.detail-facts {
+.detail-facts,
+.review-list,
+.notification-list {
   display: grid;
   gap: 1rem;
 }
@@ -577,6 +579,13 @@ textarea {
   gap: 0.9rem;
 }
 
+.order-item-card__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .order-item-card,
 .history-card {
   padding: 1rem;
@@ -592,6 +601,101 @@ textarea {
 .history-card[data-selected="true"] {
   border-color: rgba(211, 84, 0, 0.28);
   box-shadow: 0 12px 24px rgba(211, 84, 0, 0.12);
+}
+
+.review-list {
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.review-card,
+.notification-card {
+  padding: 1rem;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+}
+
+.review-card__header,
+.notification-card__top {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.review-card__meta,
+.notification-card__top span {
+  color: var(--text-soft);
+  font-size: 0.92rem;
+}
+
+.review-card__content,
+.notification-card__content {
+  margin: 0.85rem 0;
+}
+
+.review-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(20, 89, 68, 0.1);
+  color: #145944;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.review-form {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.rating-row,
+.keyword-list {
+  display: flex;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.star-button,
+.keyword-chip {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+}
+
+.star-button {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  font-size: 1.2rem;
+  color: rgba(20, 38, 31, 0.3);
+}
+
+.star-button[data-active="true"] {
+  color: #d18b04;
+  background: rgba(255, 209, 102, 0.22);
+}
+
+.keyword-chip {
+  min-height: 42px;
+  padding: 0.6rem 0.85rem;
+  border-radius: 999px;
+}
+
+.keyword-chip[data-active="true"] {
+  background: rgba(211, 84, 0, 0.12);
+  color: var(--customer-accent);
+  border-color: rgba(211, 84, 0, 0.22);
+}
+
+.review-textarea {
+  resize: vertical;
+  min-height: 180px;
+}
+
+.notification-card[data-read="false"] {
+  border-color: rgba(211, 84, 0, 0.24);
 }
 
 @media (max-width: 960px) {
@@ -618,7 +722,10 @@ textarea {
   .cart-item__header,
   .cart-item__footer,
   .cart-summary,
-  .history-card__top {
+  .history-card__top,
+  .review-card__header,
+  .notification-card__top,
+  .order-item-card__actions {
     flex-direction: column;
     align-items: flex-start;
   }
