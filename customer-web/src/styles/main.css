@@ -650,6 +650,16 @@ textarea {
   gap: 1.2rem;
 }
 
+.ai-form-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.ai-form-grid__wide {
+  grid-column: 1 / -1;
+}
+
 .rating-row,
 .keyword-list {
   display: flex;
@@ -698,6 +708,14 @@ textarea {
   border-color: rgba(211, 84, 0, 0.24);
 }
 
+.recommend-reason {
+  margin: 0;
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  background: rgba(211, 84, 0, 0.08);
+  color: #7f4712;
+}
+
 @media (max-width: 960px) {
   .app-shell {
     grid-template-columns: 1fr;
@@ -733,5 +751,9 @@ textarea {
   .status-timeline,
   .history-grid {
     grid-template-columns: 1fr;
+  }
+
+  .ai-form-grid__wide {
+    grid-column: auto;
   }
 }
