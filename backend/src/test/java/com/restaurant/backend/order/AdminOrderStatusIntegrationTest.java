@@ -13,6 +13,7 @@ import com.restaurant.backend.menu.domain.Menu;
 import com.restaurant.backend.menu.domain.MenuStatus;
 import com.restaurant.backend.menu.repository.MenuRepository;
 import com.restaurant.backend.notification.domain.Notification;
+import com.restaurant.backend.notification.domain.NotificationType;
 import com.restaurant.backend.notification.repository.NotificationRepository;
 import com.restaurant.backend.order.domain.Order;
 import com.restaurant.backend.order.domain.OrderItem;
@@ -143,8 +144,8 @@ class AdminOrderStatusIntegrationTest {
 
         assertThat(notificationRepository.countByUser_Id(userId)).isEqualTo(1);
         Notification notification = notificationRepository.findTopByUser_IdOrderByCreatedAtDescIdDesc(userId).orElseThrow();
-        assertThat(notification.getType()).isEqualTo("ORDER_STATUS_CHANGED");
-        assertThat(notification.getContent()).contains("RECEIVED").contains("COOKING");
+        assertThat(notification.getType()).isEqualTo(NotificationType.ORDER_COOKING);
+        assertThat(notification.getContent()).contains("조리");
     }
 
     @Test

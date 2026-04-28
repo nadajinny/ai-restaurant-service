@@ -14,6 +14,7 @@ import com.restaurant.backend.inventory.repository.InventoryRepository;
 import com.restaurant.backend.menu.domain.Menu;
 import com.restaurant.backend.menu.domain.MenuStatus;
 import com.restaurant.backend.menu.repository.MenuRepository;
+import com.restaurant.backend.notification.domain.NotificationType;
 import com.restaurant.backend.notification.repository.NotificationRepository;
 import com.restaurant.backend.order.domain.Order;
 import com.restaurant.backend.order.domain.OrderItem;
@@ -165,7 +166,10 @@ class PaymentControllerIntegrationTest {
         assertThat(orderRepository.findById(orderId).orElseThrow().getStatus()).isEqualTo(OrderStatus.CANCELED);
         assertThat(inventoryRepository.findByMenu_Id(menuId).orElseThrow().getQuantity()).isEqualTo(5);
         assertThat(orderStatusHistoryRepository.countByOrder_Id(orderId)).isEqualTo(1);
-        assertThat(notificationRepository.countByUser_Id(userId)).isEqualTo(1);
+        assertThat(notificationRepository.countByUser_Id(userId)).isEqualTo(2);
+        assertThat(notificationRepository.findAllByUser_IdOrderByCreatedAtDescIdDesc(userId))
+                .extracting(notification -> notification.getType())
+                .containsExactly(NotificationType.ORDER_CANCELED, NotificationType.PAYMENT_FAILED);
     }
 
     @Test

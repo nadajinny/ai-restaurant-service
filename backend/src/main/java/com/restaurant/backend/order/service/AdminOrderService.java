@@ -60,8 +60,7 @@ public class AdminOrderService {
                 OrderStatusHistory.create(order, currentStatus, nextStatus, SYSTEM_ADMIN)
         );
 
-        // Notification 생성 구조와 연결되는 호출 지점
-        notificationService.createOrderStatusChangedNotification(order, currentStatus, nextStatus);
+        notificationService.createOrderStatusNotification(order, nextStatus);
 
         return new AdminOrderStatusUpdateResponse(order.getId(), order.getStatus());
     }

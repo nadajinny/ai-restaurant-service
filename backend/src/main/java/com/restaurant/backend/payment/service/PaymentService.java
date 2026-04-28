@@ -59,6 +59,7 @@ public class PaymentService {
         }
 
         payment.fail();
+        notificationService.createPaymentFailedNotification(order);
         cancelOrderForPaymentFailure(order);
         return toResponse(payment);
     }
@@ -116,7 +117,7 @@ public class PaymentService {
         orderStatusHistoryRepository.save(
                 OrderStatusHistory.create(order, currentStatus, OrderStatus.CANCELED, MOCK_PAYMENT_SYSTEM)
         );
-        notificationService.createOrderStatusChangedNotification(order, currentStatus, OrderStatus.CANCELED);
+        notificationService.createOrderStatusNotification(order, OrderStatus.CANCELED);
     }
 
     private Order getOrderById(Long orderId) {

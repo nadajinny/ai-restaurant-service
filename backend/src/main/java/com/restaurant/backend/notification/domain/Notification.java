@@ -4,6 +4,8 @@ import com.restaurant.backend.common.entity.BaseEntity;
 import com.restaurant.backend.user.domain.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -17,8 +19,9 @@ public class Notification extends BaseEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 50)
-    private String type;
+    private NotificationType type;
 
     @Column(nullable = false, length = 1000)
     private String content;
@@ -29,7 +32,7 @@ public class Notification extends BaseEntity {
     protected Notification() {
     }
 
-    public static Notification create(User user, String type, String content) {
+    public static Notification create(User user, NotificationType type, String content) {
         Notification notification = new Notification();
         notification.user = user;
         notification.type = type;
@@ -38,11 +41,15 @@ public class Notification extends BaseEntity {
         return notification;
     }
 
+    public void markAsRead() {
+        this.read = true;
+    }
+
     public User getUser() {
         return user;
     }
 
-    public String getType() {
+    public NotificationType getType() {
         return type;
     }
 

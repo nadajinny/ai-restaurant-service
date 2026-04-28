@@ -6,6 +6,7 @@ import com.restaurant.backend.inventory.service.InventoryService;
 import com.restaurant.backend.menu.domain.Menu;
 import com.restaurant.backend.menu.domain.MenuStatus;
 import com.restaurant.backend.menu.repository.MenuRepository;
+import com.restaurant.backend.notification.service.NotificationService;
 import com.restaurant.backend.order.domain.Order;
 import com.restaurant.backend.order.domain.OrderItem;
 import com.restaurant.backend.order.domain.OrderStatus;
@@ -43,6 +44,7 @@ public class OrderService {
     private final UserRepository userRepository;
     private final OrderMapper orderMapper;
     private final InventoryService inventoryService;
+    private final NotificationService notificationService;
 
     public OrderService(
             OrderRepository orderRepository,
@@ -50,7 +52,8 @@ public class OrderService {
             MenuRepository menuRepository,
             UserRepository userRepository,
             OrderMapper orderMapper,
-            InventoryService inventoryService
+            InventoryService inventoryService,
+            NotificationService notificationService
     ) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
@@ -58,6 +61,7 @@ public class OrderService {
         this.userRepository = userRepository;
         this.orderMapper = orderMapper;
         this.inventoryService = inventoryService;
+        this.notificationService = notificationService;
     }
 
     @Transactional
@@ -146,6 +150,7 @@ public class OrderService {
                 .toList();
 
         orderItemRepository.saveAll(orderItems);
+        notificationService.createOrderReceivedNotification(order);
         return order;
     }
 
