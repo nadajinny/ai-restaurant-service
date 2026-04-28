@@ -1,20 +1,78 @@
 <script setup>
+import { menuApi } from "@/api";
 import PageHero from "@/components/PageHero.vue";
 import PagePanel from "@/components/PagePanel.vue";
-import ScreenBlueprint from "@/components/ScreenBlueprint.vue";
+import { useCart } from "@/composables/useCart";
+import { formatCurrency } from "@/utils/format";
+import { onMounted, ref, watch } from "vue";
 
-const sections = [
-  {
-    title: "필터 바",
-    description: "카테고리, 가격 범위, 상태, 정렬을 한 영역에 모읍니다.",
-    items: ["카테고리 선택", "가격 범위", "정렬 옵션", "품절 제외 토글"],
-  },
-  {
-    title: "메뉴 카드 그리드",
-    description: "판매 상태와 가격, 조리 시간, 즐겨찾기 액션을 카드에서 확인합니다.",
-    items: ["메뉴 이미지", "메뉴명", "가격", "판매 상태", "상세 이동"],
-  },
+const menus = ref([]);
+const categoryOptions = ref([]);
+const loading = ref(false);
+const errorMessage = ref("");
+const feedbackMessage = ref("");
+const filters = ref({
+  category: "",
+  sort: "LATEST",
+});
+
+const { addItem, totalQuantity } = useCart();
+
+const sortOptions = [
+  { label: "최신순", value: "LATEST" },
+  { label: "가격 낮은 순", value: "PRICE_ASC" },
+  { label: "가격 높은 순", value: "PRICE_DESC" },
+  { label: "인기순", value: "POPULAR" },
+  { label: "평점순", value: "RATING" },
 ];
+
+async function fetchMenus() {
+  loading.value = true;
+  errorMessage.value = "";
+
+  try {
+    const response = await menuApi.getMenus({
+      category: filters.value.category || undefined,
+      sort: filters.value.sort,
+    });
+    menus.value = response ?? [];
+  } catch (error) {
+    errorMessage.value = error.message ?? "메뉴를 불러오지 못했습니다.";
+  } finally {
+    loading.value = false;
+  }
+}
+
+async function fetchCategoryOptions() {
+  try {
+    const response = await menuApi.getMenus();
+    categoryOptions.value = [...new Set((response ?? []).map((menu) => menu.category))].sort();
+  } catch {
+    categoryOptions.value = [];
+  }
+}
+
+function handleAddToCart(menu) {
+  if (!menu.orderable) {
+    feedbackMessage.value = "품절 또는 판매 중지 메뉴는 장바구니에 담을 수 없습니다.";
+    return;
+  }
+
+  addItem(menu);
+  feedbackMessage.value = `${menu.name}을(를) 장바구니에 담았습니다.`;
+}
+
+watch(
+  filters,
+  () => {
+    fetchMenus();
+  },
+  { deep: true },
+);
+
+onMounted(async () => {
+  await Promise.all([fetchMenus(), fetchCategoryOptions()]);
+});
 </script>
 
 <template>
@@ -22,10 +80,79 @@ const sections = [
     <PageHero
       badge="Menus"
       title="메뉴 목록 화면"
-      description="검색, 필터, 정렬, 장바구니 진입이 한 화면 안에서 이어지는 메뉴 탐색 구조입니다."
+      description="API 기반 메뉴 목록을 조회하고 카테고리와 정렬 조건으로 탐색하는 고객용 화면입니다."
     />
-    <PagePanel title="연결 API" endpoint="GET /menus" description="고객용 메뉴 목록, 카테고리, 정렬, 가격 필터를 연결합니다.">
-      <ScreenBlueprint :sections="sections" />
+
+    <PagePanel title="탐색 조건" endpoint="GET /menus" description="카테고리 필터와 정렬 조건을 서버 API에 직접 전달합니다.">
+      <div class="menu-toolbar">
+        <label class="field-stack">
+          <span>카테고리</span>
+          <select v-model="filters.category" class="app-field">
+            <option value="">전체</option>
+            <option v-for="category in categoryOptions" :key="category" :value="category">
+              {{ category }}
+            </option>
+          </select>
+        </label>
+
+        <label class="field-stack">
+          <span>정렬</span>
+          <select v-model="filters.sort" class="app-field">
+            <option v-for="option in sortOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+        </label>
+
+        <div class="menu-toolbar__summary">
+          <strong>장바구니 수량</strong>
+          <span>{{ totalQuantity }}개</span>
+        </div>
+      </div>
+    </PagePanel>
+
+    <PagePanel
+      title="메뉴 목록"
+      description="품절 메뉴는 조회 가능하지만 주문 불가로 표시하고, 판매 중지 메뉴는 API에서 제외됩니다."
+    >
+      <p v-if="feedbackMessage" class="info-banner">{{ feedbackMessage }}</p>
+      <p v-if="errorMessage" class="error-banner">{{ errorMessage }}</p>
+      <p v-if="loading" class="state-copy">메뉴를 불러오는 중입니다.</p>
+      <p v-else-if="menus.length === 0" class="state-copy">조건에 맞는 메뉴가 없습니다.</p>
+
+      <div v-else class="menu-grid">
+        <article v-for="menu in menus" :key="menu.menuId" class="menu-card">
+          <div class="menu-card__image-wrap">
+            <img :src="menu.imageUrl" :alt="menu.name" class="menu-card__image" />
+            <span class="menu-status" :data-status="menu.status">
+              {{ menu.orderable ? "주문 가능" : menu.status === "SOLD_OUT" ? "품절" : "판매 중지" }}
+            </span>
+          </div>
+          <div class="menu-card__body">
+            <div class="menu-card__header">
+              <div>
+                <p class="menu-card__category">{{ menu.category }}</p>
+                <h3>{{ menu.name }}</h3>
+              </div>
+              <strong>{{ formatCurrency(menu.price) }}원</strong>
+            </div>
+            <p class="menu-card__meta">예상 조리 시간 {{ menu.cookingTime }}분</p>
+            <div class="menu-card__actions">
+              <router-link :to="`/menus/${menu.menuId}`" class="secondary-button">
+                상세 보기
+              </router-link>
+              <button
+                type="button"
+                class="primary-button"
+                :disabled="!menu.orderable"
+                @click="handleAddToCart(menu)"
+              >
+                {{ menu.orderable ? "장바구니 추가" : "주문 불가" }}
+              </button>
+            </div>
+          </div>
+        </article>
+      </div>
     </PagePanel>
   </div>
 </template>
