@@ -181,25 +181,44 @@ uvicorn app.main:app --reload --port 8000
 
 기본 포트는 `8000`이다.
 
+## 인증 및 기본 계정
+
+JWT 인증이 적용되어 있다. 로그인 후 받은 `accessToken`을 `Authorization: Bearer <token>` 헤더로 전달해야 한다.
+
+- 고객 기본 계정: `user01 / password`
+- 관리자 기본 계정: `admin01 / password`
+
+로그인 예시
+
+```bash
+curl -X POST http://localhost:8080/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "loginId": "user01",
+    "password": "password"
+  }'
+```
+
 예시 엔드포인트
 
 - `GET /api/v1/health`
-- `GET /api/v1/users/sample`
+- `POST /auth/login`
+- `GET /api/v1/users/me`
 - `GET /menus`
 - `GET /menus?category=KOREAN`
 - `GET /menus?minPrice=8000&maxPrice=12000&status=AVAILABLE&sort=PRICE_ASC`
 - `GET /menus/{menuId}`
-- `POST /favorites?userId=1`
-- `GET /favorites?userId=1`
-- `DELETE /favorites/{menuId}?userId=1`
-- `GET /orders?userId=1`
-- `GET /orders/{orderId}?userId=1`
+- `POST /favorites`
+- `GET /favorites`
+- `DELETE /favorites/{menuId}`
+- `GET /orders`
+- `GET /orders/{orderId}`
 - `POST /orders`
-- `POST /orders/{orderId}/reorder?userId=1`
-- `POST /reviews?userId=1`
+- `POST /orders/{orderId}/reorder`
+- `POST /reviews`
 - `GET /menus/{menuId}/reviews`
-- `PUT /reviews/{reviewId}?userId=1`
-- `DELETE /reviews/{reviewId}?userId=1`
+- `PUT /reviews/{reviewId}`
+- `DELETE /reviews/{reviewId}`
 - `GET /admin/reviews`
 - `PATCH /admin/reviews/{reviewId}/hide`
 - `GET /admin/inventories`
@@ -213,9 +232,9 @@ uvicorn app.main:app --reload --port 8000
 - `PUT /admin/coupons/{couponId}`
 - `PATCH /admin/coupons/{couponId}/disable`
 - `GET /coupons/available`
-- `POST /coupons/apply?userId=1`
-- `GET /notifications?userId=1`
-- `PATCH /notifications/{notificationId}/read?userId=1`
+- `POST /coupons/apply`
+- `GET /notifications`
+- `PATCH /notifications/{notificationId}/read`
 - `GET /admin/dashboard`
 - `GET /admin/analytics/sales`
 - `GET /admin/analytics/popular-menus`
@@ -257,7 +276,8 @@ curl -X POST "http://localhost:8080/ai/recommend" \
     "message": "오늘 매운 음식이 먹고 싶어"
   }'
 
-curl "http://localhost:8080/ai/personalized-recommendations?userId=1"
+curl "http://localhost:8080/ai/personalized-recommendations" \
+  -H "Authorization: Bearer <access-token>"
 
 curl -X POST "http://localhost:8080/ai/emotion-recommend" \
   -H "Content-Type: application/json" \
@@ -314,14 +334,17 @@ curl -X POST http://localhost:8080/admin/menus \
 즐겨찾기 예시
 
 ```bash
-curl -X POST "http://localhost:8080/favorites?userId=1" \
+curl -X POST "http://localhost:8080/favorites" \
+  -H "Authorization: Bearer <access-token>" \
   -H "Content-Type: application/json" \
   -d '{
     "menuId": 1
   }'
 
-curl "http://localhost:8080/favorites?userId=1"
-curl -X DELETE "http://localhost:8080/favorites/1?userId=1"
+curl "http://localhost:8080/favorites" \
+  -H "Authorization: Bearer <access-token>"
+curl -X DELETE "http://localhost:8080/favorites/1" \
+  -H "Authorization: Bearer <access-token>"
 ```
 
 주문 생성 예시
@@ -341,9 +364,11 @@ curl -X POST http://localhost:8080/orders \
 재주문 예시
 
 ```bash
-curl -X POST "http://localhost:8080/orders/1/reorder?userId=1"
+curl -X POST "http://localhost:8080/orders/1/reorder" \
+  -H "Authorization: Bearer <access-token>"
 
-curl -X POST "http://localhost:8080/orders/1/reorder?userId=1" \
+curl -X POST "http://localhost:8080/orders/1/reorder" \
+  -H "Authorization: Bearer <access-token>" \
   -H "Content-Type: application/json" \
   -d '{
     "menuIds": [1, 3]
@@ -353,8 +378,10 @@ curl -X POST "http://localhost:8080/orders/1/reorder?userId=1" \
 주문 조회 예시
 
 ```bash
-curl "http://localhost:8080/orders?userId=1"
-curl "http://localhost:8080/orders/1?userId=1"
+curl "http://localhost:8080/orders" \
+  -H "Authorization: Bearer <access-token>"
+curl "http://localhost:8080/orders/1" \
+  -H "Authorization: Bearer <access-token>"
 ```
 
 주문 상태 변경 예시
@@ -370,7 +397,8 @@ curl -X PATCH http://localhost:8080/admin/orders/1/status \
 리뷰 API 예시
 
 ```bash
-curl -X POST "http://localhost:8080/reviews?userId=1" \
+curl -X POST "http://localhost:8080/reviews" \
+  -H "Authorization: Bearer <access-token>" \
   -H "Content-Type: application/json" \
   -d '{
     "orderId": 1,
@@ -382,7 +410,8 @@ curl -X POST "http://localhost:8080/reviews?userId=1" \
 
 curl "http://localhost:8080/menus/1/reviews"
 
-curl -X PUT "http://localhost:8080/reviews/1?userId=1" \
+curl -X PUT "http://localhost:8080/reviews/1" \
+  -H "Authorization: Bearer <access-token>" \
   -H "Content-Type: application/json" \
   -d '{
     "content": "양도 충분하고 다시 주문하고 싶습니다.",
@@ -390,7 +419,8 @@ curl -X PUT "http://localhost:8080/reviews/1?userId=1" \
     "aiGenerated": true
   }'
 
-curl -X DELETE "http://localhost:8080/reviews/1?userId=1"
+curl -X DELETE "http://localhost:8080/reviews/1" \
+  -H "Authorization: Bearer <access-token>"
 curl "http://localhost:8080/admin/reviews"
 curl -X PATCH "http://localhost:8080/admin/reviews/1/hide"
 ```
@@ -467,7 +497,8 @@ curl -X PUT "http://localhost:8080/admin/coupons/1" \
 curl -X PATCH "http://localhost:8080/admin/coupons/1/disable"
 curl "http://localhost:8080/coupons/available"
 
-curl -X POST "http://localhost:8080/coupons/apply?userId=1" \
+curl -X POST "http://localhost:8080/coupons/apply" \
+  -H "Authorization: Bearer <access-token>" \
   -H "Content-Type: application/json" \
   -d '{
     "orderId": 1,
@@ -478,8 +509,10 @@ curl -X POST "http://localhost:8080/coupons/apply?userId=1" \
 알림 예시
 
 ```bash
-curl "http://localhost:8080/notifications?userId=1"
-curl -X PATCH "http://localhost:8080/notifications/1/read?userId=1"
+curl "http://localhost:8080/notifications" \
+  -H "Authorization: Bearer <access-token>"
+curl -X PATCH "http://localhost:8080/notifications/1/read" \
+  -H "Authorization: Bearer <access-token>"
 ```
 
 대시보드 및 분석 예시

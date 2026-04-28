@@ -55,6 +55,12 @@ public class User extends BaseEntity {
         return user;
     }
 
+    public void synchronizeProfile(String password, String name, UserRole role) {
+        this.password = password;
+        this.name = name;
+        this.role = role;
+    }
+
     public String getLoginId() {
         return loginId;
     }

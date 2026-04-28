@@ -13,6 +13,8 @@ import com.restaurant.backend.ai.dto.AiReviewSummaryResponse;
 import com.restaurant.backend.ai.service.AiService;
 import com.restaurant.backend.common.response.ApiResponse;
 import jakarta.validation.Valid;
+import com.restaurant.backend.user.service.CurrentUserService;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,9 +27,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class AiController {
 
     private final AiService aiService;
+    private final CurrentUserService currentUserService;
 
-    public AiController(AiService aiService) {
+    public AiController(AiService aiService, CurrentUserService currentUserService) {
         this.aiService = aiService;
+        this.currentUserService = currentUserService;
     }
 
     @PostMapping("/ai/recommend")
@@ -37,9 +41,12 @@ public class AiController {
 
     @GetMapping("/ai/personalized-recommendations")
     public ApiResponse<AiPersonalizedRecommendationResponse> getPersonalizedRecommendations(
-            @RequestParam(required = false) Long userId
+            @RequestParam(required = false) Long userId,
+            Authentication authentication
     ) {
-        return ApiResponse.success(aiService.getPersonalizedRecommendations(userId));
+        return ApiResponse.success(
+                aiService.getPersonalizedRecommendations(currentUserService.getCurrentUserId(authentication))
+        );
     }
 
     @PostMapping("/ai/emotion-recommend")

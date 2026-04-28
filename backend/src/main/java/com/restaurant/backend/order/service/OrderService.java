@@ -22,7 +22,6 @@ import com.restaurant.backend.order.dto.ReorderUnavailableItemResponse;
 import com.restaurant.backend.order.repository.OrderItemRepository;
 import com.restaurant.backend.order.repository.OrderRepository;
 import com.restaurant.backend.user.domain.User;
-import com.restaurant.backend.user.domain.UserRole;
 import com.restaurant.backend.user.repository.UserRepository;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -36,8 +35,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class OrderService {
-
-    private static final String TEMPORARY_ORDER_USER_LOGIN_ID = "temporary-order-user";
 
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
@@ -69,10 +66,9 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderCreateResponse createOrder(OrderCreateRequest request) {
+    public OrderCreateResponse createOrder(Long userId, OrderCreateRequest request) {
         Map<Long, Menu> menuMap = loadAndValidateMenus(request.items());
-        // TODO: 인증 기능 구현 후 실제 로그인 사용자로 대체한다.
-        User orderUser = resolveOrderUser();
+        User orderUser = getUserById(userId);
 
         // TODO: couponCode는 쿠폰 기능 구현 전까지 nullable 입력만 허용하고 실제 할인 계산에는 반영하지 않는다.
         Order order = createOrder(orderUser, request.items(), menuMap);
@@ -206,16 +202,6 @@ public class OrderService {
         return request.menuIds().stream()
                 .filter(Objects::nonNull)
                 .collect(java.util.stream.Collectors.toCollection(HashSet::new));
-    }
-
-    private User resolveOrderUser() {
-        return userRepository.findByLoginId(TEMPORARY_ORDER_USER_LOGIN_ID)
-                .orElseGet(() -> userRepository.save(User.create(
-                        TEMPORARY_ORDER_USER_LOGIN_ID,
-                        "temporary-password",
-                        "임시 주문 사용자",
-                        UserRole.USER
-                )));
     }
 
     private User getUserById(Long userId) {

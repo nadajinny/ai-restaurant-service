@@ -30,6 +30,8 @@ import com.restaurant.backend.order.repository.OrderRepository;
 import com.restaurant.backend.order.repository.OrderStatusHistoryRepository;
 import com.restaurant.backend.payment.repository.PaymentRepository;
 import com.restaurant.backend.review.repository.ReviewRepository;
+import com.restaurant.backend.user.domain.User;
+import com.restaurant.backend.user.domain.UserRole;
 import com.restaurant.backend.user.repository.UserRepository;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,6 +41,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
@@ -87,6 +90,7 @@ class AiControllerIntegrationTest {
     @MockBean
     private AiServerClient aiServerClient;
 
+    private Long userId;
     private Long availableMenuId;
     private Long soldOutMenuId;
     private Long hiddenMenuId;
@@ -105,6 +109,8 @@ class AiControllerIntegrationTest {
         couponRepository.deleteAll();
         userRepository.deleteAll();
         menuRepository.deleteAll();
+
+        userId = userRepository.save(User.create("ai-user", "password", "AI 사용자", UserRole.USER)).getId();
 
         availableMenuId = menuRepository.save(Menu.create(
                 "김치찌개",
@@ -161,13 +167,14 @@ class AiControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "ai-user", roles = "USER")
     void personalizedRecommendationsReturnsFallbackWhenAiServerFails() throws Exception {
-        given(aiServerClient.getPersonalizedRecommendations(eq(1L))).willThrow(new RuntimeException("AI server down"));
+        given(aiServerClient.getPersonalizedRecommendations(eq(userId))).willThrow(new RuntimeException("AI server down"));
 
-        mockMvc.perform(get("/ai/personalized-recommendations").param("userId", "1"))
+        mockMvc.perform(get("/ai/personalized-recommendations"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.data.userId").value(1))
+                .andExpect(jsonPath("$.data.userId").value(userId))
                 .andExpect(jsonPath("$.data.recommendations.length()").value(1))
                 .andExpect(jsonPath("$.data.recommendations[0].menuId").value(availableMenuId));
     }
@@ -220,6 +227,7 @@ class AiControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "admin01", roles = "ADMIN")
     void newMenuRecommendationsReturnsAiServerResponse() throws Exception {
         given(aiServerClient.getNewMenuRecommendations()).willReturn(new AiNewMenuRecommendationsResponse(List.of(
                 new AiNewMenuRecommendationDto("청양 제육 덮밥", "KOREAN", "수요가 높습니다.")

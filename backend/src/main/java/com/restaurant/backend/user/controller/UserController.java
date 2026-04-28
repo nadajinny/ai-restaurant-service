@@ -1,8 +1,9 @@
 package com.restaurant.backend.user.controller;
 
 import com.restaurant.backend.common.response.ApiResponse;
-import com.restaurant.backend.user.dto.UserSummaryDto;
-import com.restaurant.backend.user.service.UserService;
+import com.restaurant.backend.user.dto.AuthenticatedUserDto;
+import com.restaurant.backend.user.service.CurrentUserService;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,14 +12,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/users")
 public class UserController {
 
-    private final UserService userService;
+    private final CurrentUserService currentUserService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
+    public UserController(CurrentUserService currentUserService) {
+        this.currentUserService = currentUserService;
     }
 
-    @GetMapping("/sample")
-    public ApiResponse<UserSummaryDto> getSampleUser() {
-        return ApiResponse.success(userService.getSampleUser());
+    @GetMapping("/me")
+    public ApiResponse<AuthenticatedUserDto> getCurrentUser(Authentication authentication) {
+        return ApiResponse.success(currentUserService.getCurrentUserSummary(authentication));
     }
 }

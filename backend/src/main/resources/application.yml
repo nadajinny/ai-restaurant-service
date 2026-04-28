@@ -34,3 +34,7 @@ app:
   cache:
     enabled: ${CACHE_ENABLED:true}
     redis-enabled: ${CACHE_REDIS_ENABLED:true}
+
+jwt:
+  secret: ${JWT_SECRET:restaurant-jwt-secret-key-please-change-in-production-2026}
+  access-token-expiration-ms: ${JWT_ACCESS_TOKEN_EXPIRATION_MS:21600000}

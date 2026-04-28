@@ -2,6 +2,7 @@ import CustomerLayout from "@/layouts/CustomerLayout.vue";
 import AiRecommendView from "@/views/customer/AiRecommendView.vue";
 import CartView from "@/views/customer/CartView.vue";
 import FavoritesView from "@/views/customer/FavoritesView.vue";
+import LoginView from "@/views/customer/LoginView.vue";
 import MainView from "@/views/customer/MainView.vue";
 import MenuDetailView from "@/views/customer/MenuDetailView.vue";
 import MenuListView from "@/views/customer/MenuListView.vue";
@@ -11,6 +12,12 @@ import OrderStatusView from "@/views/customer/OrderStatusView.vue";
 import ReviewWriteView from "@/views/customer/ReviewWriteView.vue";
 
 export const customerRoutes = [
+  {
+    path: "/login",
+    name: "customer-login",
+    component: LoginView,
+    meta: { title: "고객 로그인", guestOnly: true },
+  },
   {
     path: "/",
     component: CustomerLayout,
@@ -43,13 +50,13 @@ export const customerRoutes = [
         path: "orders/status",
         name: "order-status",
         component: OrderStatusView,
-        meta: { title: "주문 상태" },
+        meta: { title: "주문 상태", requiresAuth: true },
       },
       {
         path: "orders/history",
         name: "order-history",
         component: OrderHistoryView,
-        meta: { title: "주문 이력" },
+        meta: { title: "주문 이력", requiresAuth: true },
       },
       {
         path: "ai/recommend",
@@ -61,19 +68,19 @@ export const customerRoutes = [
         path: "reviews/write",
         name: "review-write",
         component: ReviewWriteView,
-        meta: { title: "리뷰 작성" },
+        meta: { title: "리뷰 작성", requiresAuth: true },
       },
       {
         path: "favorites",
         name: "favorites",
         component: FavoritesView,
-        meta: { title: "즐겨찾기" },
+        meta: { title: "즐겨찾기", requiresAuth: true },
       },
       {
         path: "notifications",
         name: "notifications",
         component: NotificationsView,
-        meta: { title: "알림" },
+        meta: { title: "알림", requiresAuth: true },
       },
     ],
   },

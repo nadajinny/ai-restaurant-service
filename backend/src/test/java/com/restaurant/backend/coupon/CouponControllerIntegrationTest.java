@@ -36,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
@@ -127,6 +128,7 @@ class CouponControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "admin01", roles = "ADMIN")
     void adminCreatesUpdatesAndDisablesCoupon() throws Exception {
         String response = mockMvc.perform(post("/admin/coupons")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -216,6 +218,7 @@ class CouponControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "coupon-user", roles = "USER")
     void applyCouponCalculatesDiscountAndStoresUsage() throws Exception {
         couponRepository.save(Coupon.create(
                 "WELCOME10",
@@ -253,6 +256,7 @@ class CouponControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "coupon-user", roles = "USER")
     void applyCouponRejectsDuplicateUsageBySameUser() throws Exception {
         Coupon coupon = couponRepository.save(Coupon.create(
                 "ONE-TIME",
@@ -303,6 +307,7 @@ class CouponControllerIntegrationTest {
     }
 
     @Test
+    @WithMockUser(username = "coupon-user", roles = "USER")
     void applyCouponRejectsOtherUsersOrderAndMinOrderViolation() throws Exception {
         couponRepository.save(Coupon.create(
                 "MIN25000",

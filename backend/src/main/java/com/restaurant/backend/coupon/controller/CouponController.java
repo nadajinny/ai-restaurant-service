@@ -5,8 +5,10 @@ import com.restaurant.backend.coupon.dto.AvailableCouponResponse;
 import com.restaurant.backend.coupon.dto.CouponApplyRequest;
 import com.restaurant.backend.coupon.dto.CouponApplyResponse;
 import com.restaurant.backend.coupon.service.CouponService;
+import com.restaurant.backend.user.service.CurrentUserService;
 import jakarta.validation.Valid;
 import java.util.List;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,9 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class CouponController {
 
     private final CouponService couponService;
+    private final CurrentUserService currentUserService;
 
-    public CouponController(CouponService couponService) {
+    public CouponController(CouponService couponService, CurrentUserService currentUserService) {
         this.couponService = couponService;
+        this.currentUserService = currentUserService;
     }
 
     @GetMapping("/available")
@@ -31,9 +35,13 @@ public class CouponController {
 
     @PostMapping("/apply")
     public ApiResponse<CouponApplyResponse> applyCoupon(
-            @RequestParam Long userId,
+            @RequestParam(required = false) Long userId,
+            Authentication authentication,
             @Valid @RequestBody CouponApplyRequest request
     ) {
-        return ApiResponse.success("쿠폰이 적용되었습니다.", couponService.applyCoupon(userId, request));
+        return ApiResponse.success(
+                "쿠폰이 적용되었습니다.",
+                couponService.applyCoupon(currentUserService.getCurrentUserId(authentication), request)
+        );
     }
 }

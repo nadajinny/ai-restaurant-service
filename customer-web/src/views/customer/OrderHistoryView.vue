@@ -51,7 +51,7 @@ async function fetchOrders() {
   try {
     const user = await ensureCurrentUser();
     currentUserId.value = user.id;
-    orders.value = await orderApi.getOrders(user.id);
+    orders.value = await orderApi.getOrders();
     if (orders.value.length > 0) {
       await openOrderDetail(orders.value[0].orderId);
     } else {
@@ -73,7 +73,7 @@ async function openOrderDetail(orderId) {
   errorMessage.value = "";
 
   try {
-    selectedOrder.value = await orderApi.getOrder(orderId, currentUserId.value);
+    selectedOrder.value = await orderApi.getOrder(orderId);
   } catch (error) {
     errorMessage.value = error.message ?? "주문 상세를 불러오지 못했습니다.";
   } finally {
@@ -91,7 +91,7 @@ async function reorder(orderSummary) {
   errorMessage.value = "";
 
   try {
-    const response = await orderApi.reorder(orderSummary.orderId, currentUserId.value, {});
+    const response = await orderApi.reorder(orderSummary.orderId, {});
     const notices = [];
 
     if (response.totalPrice !== orderSummary.totalPrice) {
@@ -112,7 +112,7 @@ async function reorder(orderSummary) {
         : "재주문이 완료되었습니다.";
 
     await fetchOrders();
-    await router.push(`/orders/status?orderId=${response.orderId}&userId=${currentUserId.value}`);
+    await router.push(`/orders/status?orderId=${response.orderId}`);
   } catch (error) {
     errorMessage.value = error.message ?? "재주문에 실패했습니다.";
   } finally {
@@ -132,7 +132,7 @@ onMounted(fetchOrders);
     />
     <PagePanel
       title="주문 이력"
-      endpoint="GET /orders?userId={userId}"
+      endpoint="GET /orders"
       description="주문 목록은 최신순으로 표시하고, 상세 조회와 재주문을 같은 화면에서 처리합니다."
     >
       <p v-if="reorderMessage" class="info-banner">{{ reorderMessage }}</p>

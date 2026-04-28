@@ -1,50 +1,34 @@
-import { userApi } from "@/api";
-import { ref } from "vue";
+import {
+  authState,
+  getCurrentUser,
+  initializeAuthSession,
+  isAuthenticated,
+  redirectToLogin,
+} from "@/auth/authSession";
+import { computed } from "vue";
 
-const STORAGE_KEY = "restaurant-current-user";
-const currentUser = ref(null);
-const initialized = ref(false);
+async function ensureCurrentUser(options = {}) {
+  const { redirect = true } = options;
 
-function readStorage() {
-  if (typeof window === "undefined") {
-    return null;
+  initializeAuthSession();
+
+  const user = getCurrentUser();
+  if (user?.id) {
+    return user;
   }
 
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
-function persist(user) {
-  if (typeof window === "undefined") {
-    return;
+  if (redirect) {
+    redirectToLogin();
   }
 
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-}
-
-async function ensureCurrentUser() {
-  if (!initialized.value) {
-    currentUser.value = readStorage();
-    initialized.value = true;
-  }
-
-  if (currentUser.value?.id) {
-    return currentUser.value;
-  }
-
-  const user = await userApi.getSampleUser();
-  currentUser.value = user;
-  persist(user);
-  return user;
+  throw new Error("로그인이 필요합니다.");
 }
 
 export function useCurrentUser() {
   return {
-    currentUser,
+    currentUser: computed(() => authState.value.user),
+    isAuthenticated,
+    getCurrentUser,
     ensureCurrentUser,
   };
 }

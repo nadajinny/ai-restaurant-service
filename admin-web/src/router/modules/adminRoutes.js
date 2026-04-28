@@ -3,6 +3,7 @@ import AdminAiMenuIdeasView from "@/views/admin/AdminAiMenuIdeasView.vue";
 import AdminCouponManagementView from "@/views/admin/AdminCouponManagementView.vue";
 import AdminDashboardView from "@/views/admin/AdminDashboardView.vue";
 import AdminInventoryManagementView from "@/views/admin/AdminInventoryManagementView.vue";
+import AdminLoginView from "@/views/admin/AdminLoginView.vue";
 import AdminMenuManagementView from "@/views/admin/AdminMenuManagementView.vue";
 import AdminOrderManagementView from "@/views/admin/AdminOrderManagementView.vue";
 import AdminReviewManagementView from "@/views/admin/AdminReviewManagementView.vue";
@@ -10,8 +11,15 @@ import AdminSalesManagementView from "@/views/admin/AdminSalesManagementView.vue
 
 export const adminRoutes = [
   {
+    path: "/admin/login",
+    name: "admin-login",
+    component: AdminLoginView,
+    meta: { title: "관리자 로그인", guestOnly: true },
+  },
+  {
     path: "/admin",
     component: AdminLayout,
+    meta: { requiresAuth: true, requiredRole: "ADMIN" },
     children: [
       {
         path: "",

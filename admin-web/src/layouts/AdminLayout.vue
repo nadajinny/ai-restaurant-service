@@ -1,9 +1,17 @@
 <script setup>
+import { authState, clearAuthSession } from "@/auth/authSession";
 import AppShell from "@/components/AppShell.vue";
 import { adminNavigation } from "@/navigation/adminNavigation";
+import { computed } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
+const currentUser = computed(() => authState.value.user);
+
+function logout() {
+  clearAuthSession();
+  window.location.href = "/admin/login";
+}
 </script>
 
 <template>
@@ -15,9 +23,17 @@ const route = useRoute();
     theme="admin"
   >
     <template #header>
-      <div>
-        <p class="layout-kicker">Operations Console</p>
-        <h1 class="layout-title">{{ route.meta.title ?? "관리자 화면" }}</h1>
+      <div class="layout-header-row">
+        <div>
+          <p class="layout-kicker">Operations Console</p>
+          <h1 class="layout-title">{{ route.meta.title ?? "관리자 화면" }}</h1>
+        </div>
+        <div class="layout-session">
+          <template v-if="currentUser">
+            <span>{{ currentUser.name }} · {{ currentUser.role }}</span>
+            <button type="button" class="secondary-button" @click="logout">로그아웃</button>
+          </template>
+        </div>
       </div>
     </template>
     <router-view />

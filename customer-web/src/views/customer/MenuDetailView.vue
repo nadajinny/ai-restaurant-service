@@ -9,7 +9,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
-const { ensureCurrentUser } = useCurrentUser();
+const { ensureCurrentUser, getCurrentUser } = useCurrentUser();
 const { addItem, totalQuantity } = useCart();
 
 const menu = ref(null);
@@ -51,11 +51,16 @@ async function fetchReviews() {
 }
 
 async function fetchFavorites() {
+  const currentUser = getCurrentUser();
+  if (!currentUser?.id) {
+    favoriteMenuIds.value = [];
+    return;
+  }
+
   favoriteLoading.value = true;
 
   try {
-    const user = await ensureCurrentUser();
-    const favorites = await favoriteApi.getFavorites(user.id);
+    const favorites = await favoriteApi.getFavorites();
     favoriteMenuIds.value = favorites.map((item) => item.menuId);
   } catch {
     favoriteMenuIds.value = [];
@@ -83,14 +88,14 @@ async function toggleFavorite() {
   feedbackMessage.value = "";
 
   try {
-    const user = await ensureCurrentUser();
+    await ensureCurrentUser();
 
     if (isFavorite.value) {
-      await favoriteApi.deleteFavorite(user.id, menu.value.menuId);
+      await favoriteApi.deleteFavorite(menu.value.menuId);
       favoriteMenuIds.value = favoriteMenuIds.value.filter((id) => id !== menu.value.menuId);
       feedbackMessage.value = "즐겨찾기를 해제했습니다.";
     } else {
-      await favoriteApi.createFavorite(user.id, menu.value.menuId);
+      await favoriteApi.createFavorite(menu.value.menuId);
       favoriteMenuIds.value = [...favoriteMenuIds.value, menu.value.menuId];
       feedbackMessage.value = "즐겨찾기에 추가했습니다.";
     }

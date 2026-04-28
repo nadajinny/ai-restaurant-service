@@ -7,14 +7,14 @@ export const orderApi = {
       body: JSON.stringify(payload),
     });
   },
-  getOrders(userId) {
-    return apiRequest(`/orders?userId=${userId}`);
+  getOrders() {
+    return apiRequest("/orders");
   },
-  getOrder(orderId, userId) {
-    return apiRequest(`/orders/${orderId}?userId=${userId}`);
+  getOrder(orderId) {
+    return apiRequest(`/orders/${orderId}`);
   },
-  reorder(orderId, userId, payload = {}) {
-    return apiRequest(`/orders/${orderId}/reorder?userId=${userId}`, {
+  reorder(orderId, payload = {}) {
+    return apiRequest(`/orders/${orderId}/reorder`, {
       method: "POST",
       body: JSON.stringify(payload),
     });

@@ -50,8 +50,9 @@ public class PaymentService {
     }
 
     @Transactional
-    public PaymentResponse createPayment(PaymentCreateRequest request) {
+    public PaymentResponse createPayment(Long userId, PaymentCreateRequest request) {
         Order order = getOrderById(request.orderId());
+        validateOrderOwnership(order, userId);
         validatePaymentCreatable(order);
 
         Payment payment = paymentRepository.save(Payment.create(order, order.getTotalPrice(), PaymentStatus.REQUESTED));
@@ -71,13 +72,16 @@ public class PaymentService {
     }
 
     @Transactional(readOnly = true)
-    public PaymentResponse getPayment(Long paymentId) {
-        return toResponse(getPaymentById(paymentId));
+    public PaymentResponse getPayment(Long userId, Long paymentId) {
+        Payment payment = getPaymentById(paymentId);
+        validateOrderOwnership(payment.getOrder(), userId);
+        return toResponse(payment);
     }
 
     @Transactional
-    public PaymentResponse cancelPayment(Long paymentId) {
+    public PaymentResponse cancelPayment(Long userId, Long paymentId) {
         Payment payment = getPaymentById(paymentId);
+        validateOrderOwnership(payment.getOrder(), userId);
 
         if (payment.getStatus() == PaymentStatus.CANCELED) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "이미 취소된 결제입니다.");
@@ -136,6 +140,12 @@ public class PaymentService {
     private Payment getPaymentById(Long paymentId) {
         return paymentRepository.findById(paymentId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.PAYMENT_NOT_FOUND));
+    }
+
+    private void validateOrderOwnership(Order order, Long userId) {
+        if (!order.getUser().getId().equals(userId)) {
+            throw new BusinessException(ErrorCode.ACCESS_DENIED, "다른 사용자의 주문 결제에는 접근할 수 없습니다.");
+        }
     }
 
     private PaymentResponse toResponse(Payment payment) {

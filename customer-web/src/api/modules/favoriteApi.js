@@ -1,17 +1,17 @@
 import { apiRequest } from "@/api/httpClient";
 
 export const favoriteApi = {
-  createFavorite(userId, menuId) {
-    return apiRequest(`/favorites?userId=${userId}`, {
+  createFavorite(menuId) {
+    return apiRequest("/favorites", {
       method: "POST",
       body: JSON.stringify({ menuId }),
     });
   },
-  getFavorites(userId) {
-    return apiRequest(`/favorites?userId=${userId}`);
+  getFavorites() {
+    return apiRequest("/favorites");
   },
-  deleteFavorite(userId, menuId) {
-    return apiRequest(`/favorites/${menuId}?userId=${userId}`, {
+  deleteFavorite(menuId) {
+    return apiRequest(`/favorites/${menuId}`, {
       method: "DELETE",
     });
   },

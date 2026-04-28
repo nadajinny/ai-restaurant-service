@@ -43,7 +43,7 @@ async function fetchNotifications() {
   try {
     const user = await ensureCurrentUser();
     currentUserId.value = user.id;
-    notifications.value = await notificationApi.getNotifications(user.id);
+    notifications.value = await notificationApi.getNotifications();
   } catch (error) {
     errorMessage.value = error.message ?? "알림 목록을 불러오지 못했습니다.";
   } finally {
@@ -57,7 +57,7 @@ async function markAsRead(notificationId) {
   }
 
   try {
-    await notificationApi.readNotification(notificationId, currentUserId.value);
+    await notificationApi.readNotification(notificationId);
     notifications.value = notifications.value.map((item) =>
       item.notificationId === notificationId ? { ...item, read: true } : item,
     );

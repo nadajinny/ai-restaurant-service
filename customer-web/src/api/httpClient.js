@@ -1,4 +1,5 @@
 import { appConfig } from "@/config/appConfig";
+import { clearAuthSession, getAccessToken, redirectToLogin } from "@/auth/authSession";
 
 async function parseResponse(response) {
   const contentType = response.headers.get("content-type") ?? "";
@@ -32,13 +33,21 @@ async function parseResponse(response) {
 
 export function createHttpClient(baseUrl = appConfig.apiBaseUrl) {
   return async function request(path, options = {}) {
+    const accessToken = getAccessToken();
     const response = await fetch(`${baseUrl}${path}`, {
       headers: {
         "Content-Type": "application/json",
+        ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
         ...(options.headers ?? {}),
       },
       ...options,
     });
+
+    if (response.status === 401) {
+      clearAuthSession();
+      redirectToLogin();
+      throw new Error("로그인이 필요합니다.");
+    }
 
     return parseResponse(response);
   };

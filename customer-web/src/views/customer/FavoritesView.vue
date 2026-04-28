@@ -23,7 +23,7 @@ async function fetchFavorites() {
   try {
     const user = await ensureCurrentUser();
     currentUserId.value = user.id;
-    favorites.value = await favoriteApi.getFavorites(user.id);
+    favorites.value = await favoriteApi.getFavorites();
   } catch (error) {
     errorMessage.value = error.message ?? "즐겨찾기 목록을 불러오지 못했습니다.";
   } finally {
@@ -61,7 +61,7 @@ async function removeFavorite(menuId) {
   }
 
   try {
-    await favoriteApi.deleteFavorite(currentUserId.value, menuId);
+    await favoriteApi.deleteFavorite(menuId);
     favorites.value = favorites.value.filter((item) => item.menuId !== menuId);
     feedbackMessage.value = "즐겨찾기를 해제했습니다.";
   } catch (error) {

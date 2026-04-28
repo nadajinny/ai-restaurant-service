@@ -8,7 +8,7 @@ import { formatCurrency } from "@/utils/format";
 import { computed, onMounted, ref } from "vue";
 
 const { addItem, totalQuantity } = useCart();
-const { ensureCurrentUser } = useCurrentUser();
+const { ensureCurrentUser, getCurrentUser } = useCurrentUser();
 
 const menuCatalog = ref([]);
 const recommendationMessage = ref("오늘 먹고 싶은 메뉴를 자연어로 입력해 보세요.");
@@ -130,11 +130,16 @@ async function requestEmotionRecommend() {
 }
 
 async function loadPersonalizedRecommendations() {
+  const currentUser = getCurrentUser();
+  if (!currentUser?.id) {
+    personalizedRecommendations.value = [];
+    return;
+  }
+
   personalizedLoading.value = true;
 
   try {
-    const user = await ensureCurrentUser();
-    const response = await aiApi.getPersonalizedRecommendations(user.id);
+    const response = await aiApi.getPersonalizedRecommendations();
     personalizedRecommendations.value = response.recommendations ?? [];
   } catch {
     personalizedRecommendations.value = [];

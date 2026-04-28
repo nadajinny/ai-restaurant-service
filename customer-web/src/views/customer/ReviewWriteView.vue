@@ -79,8 +79,8 @@ async function submitReview() {
   errorMessage.value = "";
 
   try {
-    const user = await ensureCurrentUser();
-    await reviewApi.createReview(user.id, {
+    await ensureCurrentUser();
+    await reviewApi.createReview({
       orderId: Number(orderId.value),
       menuId: Number(menuId.value),
       content: content.value,

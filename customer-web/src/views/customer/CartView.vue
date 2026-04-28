@@ -58,7 +58,7 @@ async function submitOrder() {
   errorMessage.value = "";
 
   try {
-    const user = await ensureCurrentUser();
+    await ensureCurrentUser();
     const order = await orderApi.createOrder({
       items: cartItems.value.map((item) => ({
         menuId: item.menuId,
@@ -68,7 +68,7 @@ async function submitOrder() {
     });
 
     clearCart();
-    await router.push(`/orders/status?orderId=${order.orderId}&userId=${user.id}`);
+    await router.push(`/orders/status?orderId=${order.orderId}`);
   } catch (error) {
     errorMessage.value = error.message ?? "주문 생성에 실패했습니다.";
   } finally {

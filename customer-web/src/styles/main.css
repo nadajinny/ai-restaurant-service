@@ -132,6 +132,22 @@ textarea {
   margin-bottom: 1.5rem;
 }
 
+.layout-header-row,
+.layout-session {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.layout-header-row {
+  flex-wrap: wrap;
+}
+
+.layout-session {
+  color: var(--text-soft);
+}
+
 .layout-title {
   margin: 0.2rem 0 0;
   font-size: clamp(2rem, 2.8vw, 3rem);
@@ -512,6 +528,44 @@ textarea {
 .warning-banner {
   background: rgba(211, 84, 0, 0.12);
   color: #8c4606;
+}
+
+.auth-shell {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.auth-card {
+  width: min(100%, 440px);
+  display: grid;
+  gap: 1rem;
+  padding: 2rem;
+  border-radius: 28px;
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+  box-shadow: var(--shadow);
+}
+
+.auth-title {
+  margin: 0;
+  font-size: 2rem;
+}
+
+.auth-description,
+.auth-help {
+  color: var(--text-soft);
+}
+
+.auth-form {
+  display: grid;
+  gap: 1rem;
+}
+
+.auth-help {
+  display: grid;
+  gap: 0.35rem;
 }
 
 .order-overview,

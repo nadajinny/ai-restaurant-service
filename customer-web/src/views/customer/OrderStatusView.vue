@@ -41,7 +41,6 @@ function isStepActive(status) {
 
 async function fetchOrder() {
   const orderId = route.query.orderId;
-  let userId = route.query.userId;
 
   if (!orderId) {
     errorMessage.value = "주문 상태를 확인할 주문 정보가 없습니다.";
@@ -53,12 +52,8 @@ async function fetchOrder() {
   errorMessage.value = "";
 
   try {
-    if (!userId) {
-      const user = await ensureCurrentUser();
-      userId = user.id;
-    }
-
-    order.value = await orderApi.getOrder(orderId, userId);
+    await ensureCurrentUser();
+    order.value = await orderApi.getOrder(orderId);
   } catch (error) {
     errorMessage.value = error.message ?? "주문 상태를 조회하지 못했습니다.";
   } finally {
@@ -79,7 +74,7 @@ onMounted(fetchOrder);
     />
     <PagePanel
       title="주문 상태"
-      endpoint="GET /orders/{orderId}?userId={userId}"
+      endpoint="GET /orders/{orderId}"
       description="주문 번호, 상태, 주문 항목, 총 금액을 확인합니다."
     >
       <p v-if="errorMessage" class="error-banner">{{ errorMessage }}</p>

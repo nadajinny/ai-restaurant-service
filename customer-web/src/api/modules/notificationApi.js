@@ -1,11 +1,11 @@
 import { apiRequest } from "@/api/httpClient";
 
 export const notificationApi = {
-  getNotifications(userId) {
-    return apiRequest(`/notifications?userId=${userId}`);
+  getNotifications() {
+    return apiRequest("/notifications");
   },
-  readNotification(notificationId, userId) {
-    return apiRequest(`/notifications/${notificationId}/read?userId=${userId}`, {
+  readNotification(notificationId) {
+    return apiRequest(`/notifications/${notificationId}/read`, {
       method: "PATCH",
     });
   },
