@@ -12,6 +12,15 @@ AI 기반 식당 서비스 시스템 프로젝트다. 현재는 요구명세서�
 .
 ├── SRS.md
 ├── README.md
+├── ai-server
+│   ├── .env.example
+│   ├── requirements.txt
+│   └── app
+│       ├── api
+│       ├── clients
+│       ├── core
+│       ├── schemas
+│       └── services
 └── backend
     ├── build.gradle
     ├── gradlew
@@ -88,6 +97,21 @@ cd backend
 
 기본 데이터베이스는 SQLite이며, 실행 시 `backend/restaurant.db` 파일이 생성될 수 있다.
 
+## AI 서버 실행 방법
+
+Python 3.11 이상을 권장한다.
+
+```bash
+cd ai-server
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env
+uvicorn app.main:app --reload --port 8000
+```
+
+기본 포트는 `8000`이다.
+
 예시 엔드포인트
 
 - `GET /api/v1/health`
@@ -134,6 +158,12 @@ cd backend
 - `DELETE /admin/menus/{menuId}`
 - `PATCH /admin/menus/{menuId}/status`
 - `POST /api/v1/ai/recommendations/mock`
+- `POST /ai/recommend`
+- `GET /ai/personalized-recommendations`
+- `POST /ai/emotion-recommend`
+- `POST /ai/review-generate`
+- `GET /ai/menus/{menuId}/review-summary`
+- `GET /admin/ai/new-menu-recommendations`
 
 헬스 체크 예시
 
@@ -355,6 +385,35 @@ curl "http://localhost:8080/admin/analytics/menu-performance"
 curl "http://localhost:8080/admin/analytics/hourly-orders"
 ```
 
+AI 서버 예시
+
+```bash
+curl -X POST "http://localhost:8000/ai/recommend" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "오늘 매운 음식이 먹고 싶어"
+  }'
+
+curl "http://localhost:8000/ai/personalized-recommendations?userId=1"
+
+curl -X POST "http://localhost:8000/ai/emotion-recommend" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "emotion": "stressed",
+    "context": "오늘 일이 많았어"
+  }'
+
+curl -X POST "http://localhost:8000/ai/review-generate" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "menuId": 1,
+    "keywords": ["맛있다", "양이 많다", "친절하다"]
+  }'
+
+curl "http://localhost:8000/ai/menus/1/review-summary"
+curl "http://localhost:8000/admin/ai/new-menu-recommendations"
+```
+
 ## 테스트 방법
 
 ```bash
@@ -362,4 +421,8 @@ cd backend
 ./gradlew test
 ```
 
-현재는 메뉴 조회/관리, 주문 생성/조회/재주문/상태 변경, 재고 관리, Mock 결제, 쿠폰/할인, 알림, 대시보드/분석, 즐겨찾기, 리뷰 기능까지 포함한 기본 백엔드 흐름이 구현되어 있으며, 인증과 AI 고도화는 이후 단계에서 확장할 수 있다.
+```bash
+python3 -m compileall ai-server/app
+```
+
+현재는 메뉴 조회/관리, 주문 생성/조회/재주문/상태 변경, 재고 관리, Mock 결제, 쿠폰/할인, 알림, 대시보드/분석, 즐겨찾기, 리뷰 기능을 포함한 Spring Boot 백엔드와, Mock 기반 추천/리뷰 생성/요약을 제공하는 FastAPI AI 서버 기본 구조가 구현되어 있다. 인증과 실제 GPT 연동은 이후 단계에서 확장할 수 있다.
