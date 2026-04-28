@@ -123,6 +123,11 @@ cd backend
 - `POST /coupons/apply?userId=1`
 - `GET /notifications?userId=1`
 - `PATCH /notifications/{notificationId}/read?userId=1`
+- `GET /admin/dashboard`
+- `GET /admin/analytics/sales`
+- `GET /admin/analytics/popular-menus`
+- `GET /admin/analytics/menu-performance`
+- `GET /admin/analytics/hourly-orders`
 - `PATCH /admin/orders/{orderId}/status`
 - `POST /admin/menus`
 - `PUT /admin/menus/{menuId}`
@@ -340,6 +345,16 @@ curl "http://localhost:8080/notifications?userId=1"
 curl -X PATCH "http://localhost:8080/notifications/1/read?userId=1"
 ```
 
+대시보드 및 분석 예시
+
+```bash
+curl "http://localhost:8080/admin/dashboard"
+curl "http://localhost:8080/admin/analytics/sales"
+curl "http://localhost:8080/admin/analytics/popular-menus"
+curl "http://localhost:8080/admin/analytics/menu-performance"
+curl "http://localhost:8080/admin/analytics/hourly-orders"
+```
+
 ## 테스트 방법
 
 ```bash
@@ -347,4 +362,4 @@ cd backend
 ./gradlew test
 ```
 
-현재는 메뉴 조회/관리, 주문 생성/조회/재주문/상태 변경, 재고 관리, Mock 결제, 쿠폰/할인, 알림, 즐겨찾기, 리뷰 기능까지 포함한 기본 백엔드 흐름이 구현되어 있으며, 인증과 AI 고도화는 이후 단계에서 확장할 수 있다.
+현재는 메뉴 조회/관리, 주문 생성/조회/재주문/상태 변경, 재고 관리, Mock 결제, 쿠폰/할인, 알림, 대시보드/분석, 즐겨찾기, 리뷰 기능까지 포함한 기본 백엔드 흐름이 구현되어 있으며, 인증과 AI 고도화는 이후 단계에서 확장할 수 있다.
