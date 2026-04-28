@@ -1,14 +1,20 @@
 <script setup>
 import { menuApi } from "@/api";
+import { orderApi } from "@/api";
 import PageHero from "@/components/PageHero.vue";
 import PagePanel from "@/components/PagePanel.vue";
+import { useCurrentUser } from "@/composables/useCurrentUser";
 import { useCart } from "@/composables/useCart";
 import { formatCurrency } from "@/utils/format";
 import { computed, onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 
-const { cartItems, totalPrice, updateQuantity, removeItem, syncMenuStatuses } = useCart();
+const router = useRouter();
+const { ensureCurrentUser } = useCurrentUser();
+const { cartItems, totalPrice, updateQuantity, removeItem, clearCart, syncMenuStatuses } = useCart();
 const loading = ref(false);
 const errorMessage = ref("");
+const orderSubmitting = ref(false);
 
 const unavailableCount = computed(
   () => cartItems.value.filter((item) => !item.orderable).length,
@@ -34,6 +40,40 @@ function increaseQuantity(item) {
 
 function decreaseQuantity(item) {
   updateQuantity(item.menuId, item.quantity - 1);
+}
+
+async function submitOrder() {
+  if (cartItems.value.length === 0) {
+    errorMessage.value = "장바구니가 비어 있습니다.";
+    return;
+  }
+
+  const unavailable = cartItems.value.find((item) => !item.orderable);
+  if (unavailable) {
+    errorMessage.value = "주문 불가 메뉴가 포함되어 있어 주문을 생성할 수 없습니다.";
+    return;
+  }
+
+  orderSubmitting.value = true;
+  errorMessage.value = "";
+
+  try {
+    const user = await ensureCurrentUser();
+    const order = await orderApi.createOrder({
+      items: cartItems.value.map((item) => ({
+        menuId: item.menuId,
+        quantity: item.quantity,
+      })),
+      couponCode: null,
+    });
+
+    clearCart();
+    await router.push(`/orders/status?orderId=${order.orderId}&userId=${user.id}`);
+  } catch (error) {
+    errorMessage.value = error.message ?? "주문 생성에 실패했습니다.";
+  } finally {
+    orderSubmitting.value = false;
+  }
 }
 
 onMounted(refreshCartMenus);
@@ -102,7 +142,17 @@ onMounted(refreshCartMenus);
             <span>총 금액</span>
             <strong>{{ formatCurrency(totalPrice) }}원</strong>
           </div>
-          <router-link to="/menus" class="secondary-button">메뉴 더 보기</router-link>
+          <div class="cart-summary__actions">
+            <router-link to="/menus" class="secondary-button">메뉴 더 보기</router-link>
+            <button
+              type="button"
+              class="primary-button"
+              :disabled="orderSubmitting || unavailableCount > 0"
+              @click="submitOrder"
+            >
+              {{ orderSubmitting ? "주문 처리 중" : "주문하기" }}
+            </button>
+          </div>
         </div>
       </template>
     </PagePanel>

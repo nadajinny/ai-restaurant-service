@@ -8,3 +8,4 @@ export { menuApi } from "./modules/menuApi";
 export { notificationApi } from "./modules/notificationApi";
 export { orderApi } from "./modules/orderApi";
 export { reviewApi } from "./modules/reviewApi";
+export { userApi } from "./modules/userApi";

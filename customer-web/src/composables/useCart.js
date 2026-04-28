@@ -107,6 +107,11 @@ export function useCart() {
     persist();
   }
 
+  function clearCart() {
+    cartItems.value = [];
+    persist();
+  }
+
   function syncMenuStatuses(menus) {
     const menuMap = new Map((menus ?? []).map((menu) => [menu.menuId, menu]));
 
@@ -138,6 +143,7 @@ export function useCart() {
     addItem,
     updateQuantity,
     removeItem,
+    clearCart,
     syncMenuStatuses,
   };
 }

@@ -483,6 +483,12 @@ textarea {
   margin-top: 1rem;
 }
 
+.cart-summary__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .error-banner,
 .info-banner,
 .warning-banner {
@@ -504,6 +510,88 @@ textarea {
 .warning-banner {
   background: rgba(211, 84, 0, 0.12);
   color: #8c4606;
+}
+
+.order-overview,
+.history-grid,
+.history-list,
+.history-detail,
+.order-items {
+  display: grid;
+  gap: 1rem;
+}
+
+.order-overview__meta,
+.history-card__top {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.order-overview__meta > div,
+.history-detail__panel {
+  padding: 1rem;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+}
+
+.order-overview__meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+.order-overview__meta span,
+.history-card__status {
+  color: var(--text-soft);
+}
+
+.status-timeline {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.status-timeline__step {
+  padding: 0.9rem;
+  text-align: center;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--text-soft);
+  font-weight: 700;
+}
+
+.status-timeline__step[data-active="true"] {
+  background: rgba(211, 84, 0, 0.12);
+  color: var(--customer-accent);
+  border-color: rgba(211, 84, 0, 0.24);
+}
+
+.order-item-card,
+.history-card,
+.history-detail__panel {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.order-item-card,
+.history-card {
+  padding: 1rem;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--surface-strong);
+}
+
+.history-grid {
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+}
+
+.history-card[data-selected="true"] {
+  border-color: rgba(211, 84, 0, 0.28);
+  box-shadow: 0 12px 24px rgba(211, 84, 0, 0.12);
 }
 
 @media (max-width: 960px) {
@@ -529,8 +617,14 @@ textarea {
   .menu-card__header,
   .cart-item__header,
   .cart-item__footer,
-  .cart-summary {
+  .cart-summary,
+  .history-card__top {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .status-timeline,
+  .history-grid {
+    grid-template-columns: 1fr;
   }
 }
