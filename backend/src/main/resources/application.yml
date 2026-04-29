@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: backend
+  datasource:
+    url: jdbc:sqlite:./restaurant.db
+    driver-class-name: org.sqlite.JDBC
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.community.dialect.SQLiteDialect
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+
+server:
+  port: 8080
+
+ai:
+  server:
+    base-url: ${AI_SERVER_BASE_URL:http://localhost:8000}
+    connect-timeout-ms: ${AI_SERVER_CONNECT_TIMEOUT_MS:3000}
+    read-timeout-ms: ${AI_SERVER_READ_TIMEOUT_MS:5000}
+
+app:
+  cache:
+    enabled: ${CACHE_ENABLED:true}
+    redis-enabled: ${CACHE_REDIS_ENABLED:true}
+
+jwt:
+  secret: ${JWT_SECRET:restaurant-jwt-secret-key-please-change-in-production-2026}
+  access-token-expiration-ms: ${JWT_ACCESS_TOKEN_EXPIRATION_MS:21600000}
