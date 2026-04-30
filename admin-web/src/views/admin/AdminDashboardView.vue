@@ -31,9 +31,24 @@ onMounted(fetchDashboard);
       badge="Dashboard"
       title="관리자 대시보드"
       description="당일 주문 수, 당일 매출, 인기 메뉴, 시간대별 주문량, 품절 메뉴, 최근 리뷰를 한 화면에서 확인합니다."
-    />
+    >
+      <div v-if="dashboard" class="hero-kpis">
+        <article class="hero-kpi">
+          <span>오늘 주문</span>
+          <strong>{{ dashboard.todayOrderCount }}건</strong>
+        </article>
+        <article class="hero-kpi">
+          <span>오늘 매출</span>
+          <strong>{{ formatCurrency(dashboard.todaySales) }}원</strong>
+        </article>
+        <article class="hero-kpi">
+          <span>품절 메뉴</span>
+          <strong>{{ dashboard.soldOutMenus.length }}개</strong>
+        </article>
+      </div>
+    </PageHero>
 
-    <PagePanel title="운영 요약" endpoint="GET /admin/dashboard">
+    <PagePanel title="운영 요약">
       <p v-if="errorMessage" class="error-banner">{{ errorMessage }}</p>
       <p v-if="loading" class="state-copy">대시보드를 불러오는 중입니다.</p>
 

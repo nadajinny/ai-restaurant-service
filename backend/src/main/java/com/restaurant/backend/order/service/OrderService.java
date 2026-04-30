@@ -11,6 +11,7 @@ import com.restaurant.backend.notification.service.NotificationService;
 import com.restaurant.backend.order.domain.Order;
 import com.restaurant.backend.order.domain.OrderItem;
 import com.restaurant.backend.order.domain.OrderStatus;
+import com.restaurant.backend.order.domain.OrderStatusHistory;
 import com.restaurant.backend.order.dto.OrderCreateItemRequest;
 import com.restaurant.backend.order.dto.OrderCreateRequest;
 import com.restaurant.backend.order.dto.OrderCreateResponse;
@@ -21,6 +22,7 @@ import com.restaurant.backend.order.dto.ReorderResponse;
 import com.restaurant.backend.order.dto.ReorderUnavailableItemResponse;
 import com.restaurant.backend.order.repository.OrderItemRepository;
 import com.restaurant.backend.order.repository.OrderRepository;
+import com.restaurant.backend.order.repository.OrderStatusHistoryRepository;
 import com.restaurant.backend.user.domain.User;
 import com.restaurant.backend.user.repository.UserRepository;
 import java.util.ArrayList;
@@ -38,6 +40,7 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
+    private final OrderStatusHistoryRepository orderStatusHistoryRepository;
     private final MenuRepository menuRepository;
     private final UserRepository userRepository;
     private final OrderMapper orderMapper;
@@ -48,6 +51,7 @@ public class OrderService {
     public OrderService(
             OrderRepository orderRepository,
             OrderItemRepository orderItemRepository,
+            OrderStatusHistoryRepository orderStatusHistoryRepository,
             MenuRepository menuRepository,
             UserRepository userRepository,
             OrderMapper orderMapper,
@@ -57,6 +61,7 @@ public class OrderService {
     ) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
+        this.orderStatusHistoryRepository = orderStatusHistoryRepository;
         this.menuRepository = menuRepository;
         this.userRepository = userRepository;
         this.orderMapper = orderMapper;
@@ -139,6 +144,9 @@ public class OrderService {
         inventoryService.reserveOrderInventory(items, menuMap);
         int totalPrice = calculateTotalPrice(items, menuMap);
         Order order = orderRepository.save(Order.create(orderUser, totalPrice, OrderStatus.RECEIVED));
+        orderStatusHistoryRepository.save(
+                OrderStatusHistory.create(order, null, OrderStatus.RECEIVED, orderUser.getLoginId())
+        );
 
         List<OrderItem> orderItems = items.stream()
                 .map(item -> OrderItem.create(

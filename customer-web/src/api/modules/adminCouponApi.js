@@ -21,8 +21,8 @@ export const adminCouponApi = {
   getAvailableCoupons() {
     return apiRequest("/coupons/available");
   },
-  applyCoupon(userId, payload) {
-    return apiRequest(`/coupons/apply?userId=${userId}`, {
+  applyCoupon(payload) {
+    return apiRequest("/coupons/apply", {
       method: "POST",
       body: JSON.stringify(payload),
     });

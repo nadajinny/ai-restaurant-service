@@ -10,6 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.restaurant.backend.coupon.repository.CouponRepository;
 import com.restaurant.backend.coupon.repository.CouponUsageRepository;
+import com.restaurant.backend.inventory.domain.Inventory;
 import com.restaurant.backend.inventory.repository.InventoryRepository;
 import com.restaurant.backend.menu.domain.Menu;
 import com.restaurant.backend.menu.domain.MenuStatus;
@@ -116,6 +117,13 @@ class AdminMenuControllerIntegrationTest {
                 .andExpect(jsonPath("$.message").value("메뉴가 등록되었습니다."))
                 .andExpect(jsonPath("$.data.name").value("새우볶음밥"))
                 .andExpect(jsonPath("$.data.status").value("AVAILABLE"));
+
+        Menu createdMenu = menuRepository.findAll().stream()
+                .filter(menu -> menu.getName().equals("새우볶음밥"))
+                .findFirst()
+                .orElseThrow();
+        Inventory inventory = inventoryRepository.findByMenu_Id(createdMenu.getId()).orElseThrow();
+        assertThat(inventory.getQuantity()).isEqualTo(0);
     }
 
     @Test
@@ -181,6 +189,7 @@ class AdminMenuControllerIntegrationTest {
                 10,
                 MenuStatus.AVAILABLE
         ));
+        inventoryRepository.save(Inventory.create(menu, 3));
 
         mockMvc.perform(delete("/admin/menus/{menuId}", menu.getId()))
                 .andExpect(status().isOk())
@@ -188,6 +197,7 @@ class AdminMenuControllerIntegrationTest {
                 .andExpect(jsonPath("$.message").value("메뉴가 삭제되었습니다."));
 
         assertThat(menuRepository.findById(menu.getId())).isEmpty();
+        assertThat(inventoryRepository.findByMenu_Id(menu.getId())).isEmpty();
     }
 
     @Test

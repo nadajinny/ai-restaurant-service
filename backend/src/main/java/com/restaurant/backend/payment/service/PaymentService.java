@@ -3,6 +3,7 @@ package com.restaurant.backend.payment.service;
 import com.restaurant.backend.common.cache.CacheInvalidationService;
 import com.restaurant.backend.common.exception.BusinessException;
 import com.restaurant.backend.common.exception.ErrorCode;
+import com.restaurant.backend.coupon.service.CouponService;
 import com.restaurant.backend.inventory.service.InventoryService;
 import com.restaurant.backend.notification.service.NotificationService;
 import com.restaurant.backend.order.domain.Order;
@@ -26,6 +27,7 @@ public class PaymentService {
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
     private final OrderStatusHistoryRepository orderStatusHistoryRepository;
+    private final CouponService couponService;
     private final InventoryService inventoryService;
     private final NotificationService notificationService;
     private final MockPaymentGateway mockPaymentGateway;
@@ -35,6 +37,7 @@ public class PaymentService {
             PaymentRepository paymentRepository,
             OrderRepository orderRepository,
             OrderStatusHistoryRepository orderStatusHistoryRepository,
+            CouponService couponService,
             InventoryService inventoryService,
             NotificationService notificationService,
             MockPaymentGateway mockPaymentGateway,
@@ -43,6 +46,7 @@ public class PaymentService {
         this.paymentRepository = paymentRepository;
         this.orderRepository = orderRepository;
         this.orderStatusHistoryRepository = orderStatusHistoryRepository;
+        this.couponService = couponService;
         this.inventoryService = inventoryService;
         this.notificationService = notificationService;
         this.mockPaymentGateway = mockPaymentGateway;
@@ -125,6 +129,7 @@ public class PaymentService {
     private void cancelOrder(Order order) {
         OrderStatus currentStatus = order.getStatus();
         order.changeStatus(OrderStatus.CANCELED);
+        couponService.releaseCouponUsage(order);
         inventoryService.restoreInventoryForCanceledOrder(order);
         orderStatusHistoryRepository.save(
                 OrderStatusHistory.create(order, currentStatus, OrderStatus.CANCELED, MOCK_PAYMENT_SYSTEM)

@@ -124,7 +124,6 @@ public class CouponService {
 
     @Transactional
     public CouponApplyResponse applyCoupon(Long userId, CouponApplyRequest request) {
-        // TODO: 인증 기능 구현 후 userId 요청 파라미터 대신 JWT 기반 사용자 식별로 대체한다.
         User user = getUserById(userId);
         Order order = getOrderById(request.orderId());
         Coupon coupon = couponRepository.findByCode(request.couponCode())
@@ -144,6 +143,14 @@ public class CouponService {
                 discountAmount,
                 order.getTotalPrice()
         );
+    }
+
+    @Transactional
+    public void releaseCouponUsage(Order order) {
+        couponUsageRepository.findByOrder_Id(order.getId()).ifPresent(couponUsage -> {
+            couponUsageRepository.delete(couponUsage);
+            order.clearDiscount();
+        });
     }
 
     private void validateCouponRequest(AdminCouponRequest request, Long currentCouponId) {

@@ -39,7 +39,7 @@ onMounted(fetchReviews);
 <template>
   <div class="page-stack">
     <PageHero badge="Admin Reviews" title="리뷰 관리" description="리뷰 목록을 조회하고 부적절한 리뷰를 숨김 처리합니다." />
-    <PagePanel title="리뷰 목록" endpoint="GET /admin/reviews, PATCH /admin/reviews/{reviewId}/hide">
+    <PagePanel title="리뷰 목록">
       <p v-if="feedbackMessage" class="info-banner">{{ feedbackMessage }}</p>
       <p v-if="errorMessage" class="error-banner">{{ errorMessage }}</p>
       <p v-if="loading" class="state-copy">리뷰 목록을 불러오는 중입니다.</p>

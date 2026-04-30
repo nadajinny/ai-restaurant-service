@@ -81,7 +81,6 @@ onMounted(fetchFavorites);
     />
     <PagePanel
       title="즐겨찾기 목록"
-      endpoint="GET /favorites, DELETE /favorites/{menuId}"
       description="즐겨찾기한 메뉴의 판매 상태를 함께 표시합니다."
     >
       <p v-if="feedbackMessage" class="info-banner">{{ feedbackMessage }}</p>

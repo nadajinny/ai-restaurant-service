@@ -30,8 +30,16 @@ function logout() {
         </div>
         <div class="layout-session">
           <template v-if="currentUser">
-            <span>{{ currentUser.name }} · {{ currentUser.role }}</span>
-            <button type="button" class="secondary-button" @click="logout">로그아웃</button>
+            <div class="layout-session__card">
+              <div class="layout-session__identity">
+                <strong>{{ currentUser.name }}</strong>
+                <span>{{ currentUser.role }} · secured session</span>
+              </div>
+              <div class="layout-session__actions">
+                <span class="layout-pill">Live Ops</span>
+                <button type="button" class="secondary-button" @click="logout">로그아웃</button>
+              </div>
+            </div>
           </template>
         </div>
       </div>

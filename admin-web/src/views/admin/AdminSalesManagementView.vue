@@ -49,7 +49,7 @@ onMounted(fetchAnalytics);
 <template>
   <div class="page-stack">
     <PageHero badge="Admin Sales" title="매출 관리" description="기간별 매출과 메뉴 성과, 인기 메뉴, 시간대별 주문량을 확인합니다." />
-    <PagePanel title="기간별 매출" endpoint="GET /admin/analytics/sales">
+    <PagePanel title="기간별 매출">
       <p v-if="errorMessage" class="error-banner">{{ errorMessage }}</p>
 
       <div class="admin-actions">
@@ -82,7 +82,7 @@ onMounted(fetchAnalytics);
       </div>
     </PagePanel>
 
-    <PagePanel title="성과 분석" endpoint="GET /admin/analytics/popular-menus, GET /admin/analytics/menu-performance, GET /admin/analytics/hourly-orders">
+    <PagePanel title="성과 분석">
       <div class="admin-grid admin-grid--three">
         <section class="data-card">
           <h3>인기 메뉴</h3>

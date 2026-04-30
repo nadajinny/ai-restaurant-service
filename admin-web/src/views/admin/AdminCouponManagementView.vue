@@ -116,7 +116,7 @@ onMounted(fetchCoupons);
   <div class="page-stack">
     <PageHero badge="Admin Coupons" title="쿠폰 관리" description="쿠폰 생성, 수정, 비활성화를 처리합니다." />
 
-    <PagePanel title="쿠폰 등록 / 수정" endpoint="GET, POST, PUT, PATCH /admin/coupons">
+    <PagePanel title="쿠폰 등록 / 수정">
       <p v-if="feedbackMessage" class="info-banner">{{ feedbackMessage }}</p>
       <p v-if="errorMessage" class="error-banner">{{ errorMessage }}</p>
 

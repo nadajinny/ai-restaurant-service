@@ -28,6 +28,7 @@ import com.restaurant.backend.favorite.repository.FavoriteRepository;
 import com.restaurant.backend.user.domain.User;
 import com.restaurant.backend.user.domain.UserRole;
 import com.restaurant.backend.user.repository.UserRepository;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -216,5 +217,43 @@ class AdminOrderStatusIntegrationTest {
 
         assertThat(inventoryRepository.findByMenu_Id(menuId).orElseThrow().getQuantity()).isEqualTo(5);
         assertThat(menuRepository.findById(menuId).orElseThrow().getStatus()).isEqualTo(MenuStatus.AVAILABLE);
+    }
+
+    @Test
+    void updateOrderStatusToCanceledRestoresAppliedCouponUsage() throws Exception {
+        var coupon = couponRepository.save(com.restaurant.backend.coupon.domain.Coupon.create(
+                "WELCOME10",
+                "웰컴 쿠폰",
+                2000,
+                null,
+                null,
+                10000,
+                LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().plusDays(1),
+                5,
+                true
+        ));
+        Order order = orderRepository.findById(orderId).orElseThrow();
+        order.applyDiscount(2000);
+        couponUsageRepository.save(com.restaurant.backend.coupon.domain.CouponUsage.create(
+                coupon,
+                userRepository.findById(userId).orElseThrow(),
+                order,
+                2000
+        ));
+
+        mockMvc.perform(patch("/admin/orders/{orderId}/status", orderId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "status": "CANCELED"
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.status").value("CANCELED"));
+
+        assertThat(orderRepository.findById(orderId).orElseThrow().getTotalPrice()).isEqualTo(9000);
+        assertThat(couponUsageRepository.count()).isZero();
     }
 }

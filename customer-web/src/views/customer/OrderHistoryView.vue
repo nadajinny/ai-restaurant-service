@@ -132,7 +132,6 @@ onMounted(fetchOrders);
     />
     <PagePanel
       title="주문 이력"
-      endpoint="GET /orders"
       description="주문 목록은 최신순으로 표시하고, 상세 조회와 재주문을 같은 화면에서 처리합니다."
     >
       <p v-if="reorderMessage" class="info-banner">{{ reorderMessage }}</p>
@@ -207,6 +206,7 @@ onMounted(fetchOrders);
                   <div class="order-item-card__actions">
                     <strong>{{ formatCurrency(item.itemPrice * item.quantity) }}원</strong>
                     <router-link
+                      v-if="selectedOrder.status === 'COMPLETED'"
                       class="secondary-button"
                       :to="`/reviews/write?orderId=${selectedOrder.orderId}&menuId=${item.menuId}&menuName=${encodeURIComponent(item.menuName)}`"
                     >

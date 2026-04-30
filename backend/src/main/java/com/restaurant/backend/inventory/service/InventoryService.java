@@ -54,7 +54,6 @@ public class InventoryService {
 
     @Transactional
     public InventoryResponse updateInventory(Long menuId, InventoryUpdateRequest request) {
-        // TODO: 관리자 권한 검증은 인증 기능 구현 후 적용한다.
         Menu menu = getMenuById(menuId);
         Inventory inventory = inventoryRepository.findByMenu_Id(menuId)
                 .orElseGet(() -> inventoryRepository.save(Inventory.create(menu, 0)));
@@ -68,7 +67,6 @@ public class InventoryService {
 
     @Transactional
     public InventoryResponse markSoldOut(Long menuId) {
-        // TODO: 관리자 권한 검증은 인증 기능 구현 후 적용한다.
         Menu menu = getMenuById(menuId);
         menu.changeStatus(MenuStatus.SOLD_OUT);
         Inventory inventory = inventoryRepository.findByMenu_Id(menuId).orElse(null);
@@ -78,7 +76,6 @@ public class InventoryService {
 
     @Transactional
     public InventoryResponse markAvailable(Long menuId) {
-        // TODO: 관리자 권한 검증은 인증 기능 구현 후 적용한다.
         Menu menu = getMenuById(menuId);
         Inventory inventory = inventoryRepository.findByMenu_Id(menuId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.INVENTORY_NOT_FOUND));

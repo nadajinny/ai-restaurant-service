@@ -7,6 +7,7 @@ import com.restaurant.backend.menu.domain.Menu;
 import com.restaurant.backend.menu.repository.MenuRepository;
 import com.restaurant.backend.order.domain.Order;
 import com.restaurant.backend.order.domain.OrderItem;
+import com.restaurant.backend.order.domain.OrderStatus;
 import com.restaurant.backend.order.repository.OrderRepository;
 import com.restaurant.backend.review.domain.Review;
 import com.restaurant.backend.review.domain.ReviewStatus;
@@ -54,6 +55,7 @@ public class ReviewService {
         Menu menu = getMenuById(request.menuId());
 
         validateOrderOwnership(order, user);
+        validateOrderReviewable(order);
         validateOrderedMenu(order, menu.getId());
         validateDuplicateReview(userId, order.getId(), menu.getId());
 
@@ -109,7 +111,6 @@ public class ReviewService {
 
     @Transactional(readOnly = true)
     public List<ReviewResponse> getAdminReviews() {
-        // TODO: 관리자 권한 검증은 인증 기능 구현 후 적용한다.
         return reviewRepository.findAllByOrderByCreatedAtDescIdDesc().stream()
                 .map(reviewMapper::toReviewResponse)
                 .toList();
@@ -117,7 +118,6 @@ public class ReviewService {
 
     @Transactional
     public ReviewResponse hideReview(Long reviewId) {
-        // TODO: 관리자 권한 검증은 인증 기능 구현 후 적용한다.
         Review review = getReviewById(reviewId);
         if (review.getStatus() == ReviewStatus.DELETED) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "삭제된 리뷰는 숨김 처리할 수 없습니다.");
@@ -161,6 +161,12 @@ public class ReviewService {
 
         if (!orderedMenu) {
             throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "주문한 메뉴에 대해서만 리뷰를 작성할 수 있습니다.");
+        }
+    }
+
+    private void validateOrderReviewable(Order order) {
+        if (order.getStatus() != OrderStatus.COMPLETED) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT_VALUE, "완료된 주문에 대해서만 리뷰를 작성할 수 있습니다.");
         }
     }
 

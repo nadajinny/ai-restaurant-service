@@ -78,7 +78,6 @@ onMounted(fetchNotifications);
     />
     <PagePanel
       title="알림 목록"
-      endpoint="GET /notifications, PATCH /notifications/{notificationId}/read"
       description="읽지 않은 알림을 우선 확인하고 개별 읽음 처리를 지원합니다."
     >
       <p v-if="errorMessage" class="error-banner">{{ errorMessage }}</p>

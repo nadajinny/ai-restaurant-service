@@ -8,8 +8,8 @@ const route = useRoute();
 const router = useRouter();
 
 const form = reactive({
-  loginId: "admin01",
-  password: "password",
+  loginId: "",
+  password: "",
 });
 const loading = ref(false);
 const errorMessage = ref("");
@@ -43,35 +43,45 @@ async function submitLogin() {
 </script>
 
 <template>
-  <div class="auth-shell">
-    <section class="auth-card">
-      <p class="page-hero__badge">Admin Login</p>
-      <h1 class="auth-title">관리자 로그인</h1>
-      <p class="auth-description">
-        운영 지표, 메뉴, 주문, 리뷰, 재고, 쿠폰 관리 기능은 관리자만 접근할 수 있습니다.
-      </p>
+  <div class="auth-shell auth-shell--admin">
+    <div class="auth-shell__grid">
+      <aside class="auth-aside">
+        <p class="page-hero__badge">Operations Console</p>
+        <h1 class="auth-aside__title">Restaurant Ops</h1>
+        <p class="auth-aside__description">
+          운영 현황, 메뉴, 주문, 재고, 쿠폰, 리뷰를 한 화면 흐름으로 관리하는 관리자 전용 콘솔입니다.
+        </p>
+        <ul class="auth-aside__list">
+          <li>실시간 운영 지표 확인</li>
+          <li>메뉴 및 재고 상태 조정</li>
+          <li>주문 상태와 고객 피드백 관리</li>
+        </ul>
+      </aside>
 
-      <p v-if="errorMessage" class="error-banner">{{ errorMessage }}</p>
+      <section class="auth-card auth-card--admin">
+        <p class="page-hero__badge">Admin Login</p>
+        <h2 class="auth-title">관리자 로그인</h2>
+        <p class="auth-description">
+          운영 지표, 메뉴, 주문, 리뷰, 재고, 쿠폰 관리 기능은 관리자만 접근할 수 있습니다.
+        </p>
 
-      <form class="auth-form" @submit.prevent="submitLogin">
-        <label class="field-stack">
-          <span>로그인 ID</span>
-          <input v-model="form.loginId" class="app-field" type="text" autocomplete="username" />
-        </label>
-        <label class="field-stack">
-          <span>비밀번호</span>
-          <input v-model="form.password" class="app-field" type="password" autocomplete="current-password" />
-        </label>
+        <p v-if="errorMessage" class="error-banner">{{ errorMessage }}</p>
 
-        <button type="submit" class="primary-button" :disabled="loading">
-          {{ loading ? "로그인 중" : "로그인" }}
-        </button>
-      </form>
+        <form class="auth-form" @submit.prevent="submitLogin">
+          <label class="field-stack">
+            <span>로그인 ID</span>
+            <input v-model="form.loginId" class="app-field" type="text" autocomplete="username" />
+          </label>
+          <label class="field-stack">
+            <span>비밀번호</span>
+            <input v-model="form.password" class="app-field" type="password" autocomplete="current-password" />
+          </label>
 
-      <div class="auth-help">
-        <strong>기본 계정</strong>
-        <span>admin01 / password</span>
-      </div>
-    </section>
+          <button type="submit" class="primary-button" :disabled="loading">
+            {{ loading ? "로그인 중" : "로그인" }}
+          </button>
+        </form>
+      </section>
+    </div>
   </div>
 </template>

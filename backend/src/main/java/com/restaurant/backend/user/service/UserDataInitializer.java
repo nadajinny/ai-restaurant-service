@@ -26,15 +26,10 @@ public class UserDataInitializer implements ApplicationRunner {
     }
 
     private void ensureUser(String loginId, String rawPassword, String name, UserRole role) {
-        String encodedPassword = passwordEncoder.encode(rawPassword);
+        if (userRepository.findByLoginId(loginId).isPresent()) {
+            return;
+        }
 
-        userRepository.findByLoginId(loginId)
-                .ifPresentOrElse(
-                        user -> {
-                            user.synchronizeProfile(encodedPassword, name, role);
-                            userRepository.save(user);
-                        },
-                        () -> userRepository.save(User.create(loginId, encodedPassword, name, role))
-                );
+        userRepository.save(User.create(loginId, passwordEncoder.encode(rawPassword), name, role));
     }
 }

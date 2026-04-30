@@ -58,7 +58,7 @@ onMounted(fetchInventories);
 <template>
   <div class="page-stack">
     <PageHero badge="Admin Inventory" title="재고 관리" description="재고 수량 수정과 품절/판매 가능 전환을 처리합니다." />
-    <PagePanel title="재고 목록" endpoint="GET, PUT, PATCH /admin/inventories">
+    <PagePanel title="재고 목록">
       <p v-if="feedbackMessage" class="info-banner">{{ feedbackMessage }}</p>
       <p v-if="errorMessage" class="error-banner">{{ errorMessage }}</p>
       <p v-if="loading" class="state-copy">재고 목록을 불러오는 중입니다.</p>

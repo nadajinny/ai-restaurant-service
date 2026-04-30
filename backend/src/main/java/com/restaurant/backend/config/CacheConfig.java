@@ -19,6 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
 import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializationContext;
@@ -52,6 +53,11 @@ public class CacheConfig {
         RedisConnectionFactory redisConnectionFactory = redisConnectionFactoryProvider.getIfAvailable();
         if (redisConnectionFactory == null) {
             log.warn("RedisConnectionFactory is not available. Falling back to in-memory cache.");
+            return fallbackCacheManager;
+        }
+
+        if (!isRedisAvailable(redisConnectionFactory)) {
+            log.warn("Redis is not reachable. Falling back to in-memory cache.");
             return fallbackCacheManager;
         }
 
@@ -93,6 +99,16 @@ public class CacheConfig {
         ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager(CacheNames.ALL.toArray(String[]::new));
         cacheManager.setAllowNullValues(false);
         return cacheManager;
+    }
+
+    private boolean isRedisAvailable(RedisConnectionFactory redisConnectionFactory) {
+        try (RedisConnection connection = redisConnectionFactory.getConnection()) {
+            connection.ping();
+            return true;
+        } catch (RuntimeException exception) {
+            log.warn("Redis availability check failed.", exception);
+            return false;
+        }
     }
 
     private Map<String, RedisCacheConfiguration> cacheConfigurations(ObjectMapper objectMapper) {

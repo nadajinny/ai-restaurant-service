@@ -28,7 +28,7 @@ onMounted(fetchRecommendations);
 <template>
   <div class="page-stack">
     <PageHero badge="Admin AI" title="AI 신메뉴 추천" description="AI가 제안한 신메뉴 후보와 추천 이유를 검토합니다." />
-    <PagePanel title="신메뉴 추천 목록" endpoint="GET /admin/ai/new-menu-recommendations">
+    <PagePanel title="신메뉴 추천 목록">
       <p v-if="errorMessage" class="error-banner">{{ errorMessage }}</p>
       <p v-if="loading" class="state-copy">AI 추천 결과를 불러오는 중입니다.</p>
       <p v-else-if="recommendations.length === 0" class="state-copy">추천 결과가 없습니다.</p>

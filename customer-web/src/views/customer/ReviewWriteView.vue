@@ -106,7 +106,6 @@ async function submitReview() {
     />
     <PagePanel
       title="리뷰 작성"
-      endpoint="POST /reviews, POST /ai/review-generate"
       description="별점 입력, AI 후기 생성, 최종 저장을 한 화면에서 처리합니다."
     >
       <p v-if="feedbackMessage" class="info-banner">{{ feedbackMessage }}</p>

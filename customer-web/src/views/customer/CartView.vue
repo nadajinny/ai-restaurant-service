@@ -88,7 +88,6 @@ onMounted(refreshCartMenus);
     />
     <PagePanel
       title="장바구니 목록"
-      endpoint="localStorage + GET /menus"
       description="메뉴 최신 상태를 조회해 품절 또는 판매 중지 메뉴는 주문 불가로 표시합니다."
     >
       <p v-if="errorMessage" class="error-banner">{{ errorMessage }}</p>

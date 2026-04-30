@@ -64,6 +64,8 @@ public class MenuMapper {
     }
 
     private boolean isOrderable(Menu menu) {
-        return menu.getStatus() == MenuStatus.AVAILABLE;
+        return menu.getStatus() == MenuStatus.AVAILABLE
+                && menu.getInventory() != null
+                && menu.getInventory().getQuantity() > 0;
     }
 }

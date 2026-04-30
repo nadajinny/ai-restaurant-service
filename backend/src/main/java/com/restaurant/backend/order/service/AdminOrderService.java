@@ -3,6 +3,7 @@ package com.restaurant.backend.order.service;
 import com.restaurant.backend.common.cache.CacheInvalidationService;
 import com.restaurant.backend.common.exception.BusinessException;
 import com.restaurant.backend.common.exception.ErrorCode;
+import com.restaurant.backend.coupon.service.CouponService;
 import com.restaurant.backend.inventory.service.InventoryService;
 import com.restaurant.backend.notification.service.NotificationService;
 import com.restaurant.backend.order.domain.Order;
@@ -25,6 +26,7 @@ public class AdminOrderService {
 
     private final OrderRepository orderRepository;
     private final OrderStatusHistoryRepository orderStatusHistoryRepository;
+    private final CouponService couponService;
     private final NotificationService notificationService;
     private final InventoryService inventoryService;
     private final CacheInvalidationService cacheInvalidationService;
@@ -33,6 +35,7 @@ public class AdminOrderService {
     public AdminOrderService(
             OrderRepository orderRepository,
             OrderStatusHistoryRepository orderStatusHistoryRepository,
+            CouponService couponService,
             NotificationService notificationService,
             InventoryService inventoryService,
             CacheInvalidationService cacheInvalidationService,
@@ -40,6 +43,7 @@ public class AdminOrderService {
     ) {
         this.orderRepository = orderRepository;
         this.orderStatusHistoryRepository = orderStatusHistoryRepository;
+        this.couponService = couponService;
         this.notificationService = notificationService;
         this.inventoryService = inventoryService;
         this.cacheInvalidationService = cacheInvalidationService;
@@ -48,7 +52,6 @@ public class AdminOrderService {
 
     @Transactional(readOnly = true)
     public List<OrderListResponse> getOrders() {
-        // TODO: 관리자 권한 검증은 인증 기능 구현 후 적용한다.
         return orderRepository.findAllByOrderByCreatedAtDescIdDesc().stream()
                 .map(orderMapper::toOrderListResponse)
                 .toList();
@@ -56,7 +59,6 @@ public class AdminOrderService {
 
     @Transactional(readOnly = true)
     public OrderDetailResponse getOrder(Long orderId) {
-        // TODO: 관리자 권한 검증은 인증 기능 구현 후 적용한다.
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
         return orderMapper.toOrderDetailResponse(order);
@@ -64,7 +66,6 @@ public class AdminOrderService {
 
     @Transactional
     public AdminOrderStatusUpdateResponse updateOrderStatus(Long orderId, AdminOrderStatusUpdateRequest request) {
-        // TODO: 관리자 권한 검증은 인증 기능 구현 후 적용한다.
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.ORDER_NOT_FOUND));
 
@@ -80,6 +81,7 @@ public class AdminOrderService {
 
         order.changeStatus(nextStatus);
         if (nextStatus == OrderStatus.CANCELED) {
+            couponService.releaseCouponUsage(order);
             inventoryService.restoreInventoryForCanceledOrder(order);
         }
         orderStatusHistoryRepository.save(

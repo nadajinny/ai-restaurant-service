@@ -74,7 +74,6 @@ onMounted(fetchOrder);
     />
     <PagePanel
       title="주문 상태"
-      endpoint="GET /orders/{orderId}"
       description="주문 번호, 상태, 주문 항목, 총 금액을 확인합니다."
     >
       <p v-if="errorMessage" class="error-banner">{{ errorMessage }}</p>

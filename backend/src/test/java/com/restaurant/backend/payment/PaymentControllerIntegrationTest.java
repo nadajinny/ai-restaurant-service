@@ -29,6 +29,7 @@ import com.restaurant.backend.review.repository.ReviewRepository;
 import com.restaurant.backend.user.domain.User;
 import com.restaurant.backend.user.domain.UserRole;
 import com.restaurant.backend.user.repository.UserRepository;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -172,6 +173,50 @@ class PaymentControllerIntegrationTest {
         assertThat(notificationRepository.findAllByUser_IdOrderByCreatedAtDescIdDesc(userId))
                 .extracting(notification -> notification.getType())
                 .containsExactly(NotificationType.ORDER_CANCELED, NotificationType.PAYMENT_FAILED);
+    }
+
+    @Test
+    void createPaymentFailureRestoresAppliedCouponUsage() throws Exception {
+        couponRepository.save(com.restaurant.backend.coupon.domain.Coupon.create(
+                "WELCOME10",
+                "웰컴 쿠폰",
+                2000,
+                null,
+                null,
+                10000,
+                LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().plusDays(1),
+                5,
+                true
+        ));
+
+        mockMvc.perform(post("/coupons/apply")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "orderId": %d,
+                                  "couponCode": "WELCOME10"
+                                }
+                                """.formatted(orderId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.finalTotalPrice").value(16000));
+
+        mockMvc.perform(post("/payments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "orderId": %d,
+                                  "mockResult": "FAILED"
+                                }
+                                """.formatted(orderId)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.status").value("FAILED"));
+
+        assertThat(orderRepository.findById(orderId).orElseThrow().getStatus()).isEqualTo(OrderStatus.CANCELED);
+        assertThat(orderRepository.findById(orderId).orElseThrow().getTotalPrice()).isEqualTo(18000);
+        assertThat(couponUsageRepository.count()).isZero();
     }
 
     @Test

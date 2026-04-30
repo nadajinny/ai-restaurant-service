@@ -6,6 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.restaurant.backend.coupon.repository.CouponRepository;
 import com.restaurant.backend.coupon.repository.CouponUsageRepository;
+import com.restaurant.backend.inventory.domain.Inventory;
 import com.restaurant.backend.inventory.repository.InventoryRepository;
 import com.restaurant.backend.menu.domain.Menu;
 import com.restaurant.backend.menu.domain.MenuStatus;
@@ -120,6 +121,9 @@ class MenuControllerIntegrationTest {
         availableMenuId = availableMenu.getId();
         soldOutMenuId = soldOutMenu.getId();
         hiddenMenuId = hiddenMenu.getId();
+
+        inventoryRepository.save(Inventory.create(availableMenu, 5));
+        inventoryRepository.save(Inventory.create(soldOutMenu, 0));
     }
 
     @Test
@@ -183,6 +187,18 @@ class MenuControllerIntegrationTest {
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data[0].name").value("돈까스"))
                 .andExpect(jsonPath("$.data[1].name").value("김치찌개"));
+    }
+
+    @Test
+    void getMenusMarksAvailableMenuWithoutInventoryAsNotOrderable() throws Exception {
+        inventoryRepository.deleteAll();
+
+        mockMvc.perform(get("/menus"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data[0].name").value("돈까스"))
+                .andExpect(jsonPath("$.data[0].orderable").value(false))
+                .andExpect(jsonPath("$.data[1].name").value("김치찌개"))
+                .andExpect(jsonPath("$.data[1].orderable").value(false));
     }
 
     @Test

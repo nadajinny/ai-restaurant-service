@@ -5,6 +5,9 @@ import com.restaurant.backend.favorite.dto.FavoriteCreateRequest;
 import com.restaurant.backend.favorite.dto.FavoriteResponse;
 import com.restaurant.backend.favorite.service.FavoriteService;
 import com.restaurant.backend.user.service.CurrentUserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.security.core.Authentication;
@@ -13,12 +16,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/favorites")
+@Tag(name = "즐겨찾기", description = "메뉴 즐겨찾기 API")
+@SecurityRequirement(name = "bearerAuth")
 public class FavoriteController {
 
     private final FavoriteService favoriteService;
@@ -30,8 +34,8 @@ public class FavoriteController {
     }
 
     @PostMapping
+    @Operation(summary = "즐겨찾기 추가", description = "로그인한 사용자의 즐겨찾기에 메뉴를 추가합니다.")
     public ApiResponse<FavoriteResponse> createFavorite(
-            @RequestParam(required = false) Long userId,
             Authentication authentication,
             @Valid @RequestBody FavoriteCreateRequest request
     ) {
@@ -42,16 +46,14 @@ public class FavoriteController {
     }
 
     @GetMapping
-    public ApiResponse<List<FavoriteResponse>> getFavorites(
-            @RequestParam(required = false) Long userId,
-            Authentication authentication
-    ) {
+    @Operation(summary = "즐겨찾기 목록 조회", description = "로그인한 사용자의 즐겨찾기 메뉴 목록을 조회합니다.")
+    public ApiResponse<List<FavoriteResponse>> getFavorites(Authentication authentication) {
         return ApiResponse.success(favoriteService.getFavorites(currentUserService.getCurrentUserId(authentication)));
     }
 
     @DeleteMapping("/{menuId}")
+    @Operation(summary = "즐겨찾기 해제", description = "로그인한 사용자의 즐겨찾기에서 메뉴를 제거합니다.")
     public ApiResponse<Void> deleteFavorite(
-            @RequestParam(required = false) Long userId,
             Authentication authentication,
             @PathVariable Long menuId
     ) {

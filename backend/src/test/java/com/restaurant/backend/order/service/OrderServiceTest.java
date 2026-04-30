@@ -25,6 +25,7 @@ import com.restaurant.backend.order.dto.OrderCreateResponse;
 import com.restaurant.backend.order.dto.ReorderResponse;
 import com.restaurant.backend.order.repository.OrderItemRepository;
 import com.restaurant.backend.order.repository.OrderRepository;
+import com.restaurant.backend.order.repository.OrderStatusHistoryRepository;
 import com.restaurant.backend.user.domain.User;
 import com.restaurant.backend.user.domain.UserRole;
 import com.restaurant.backend.user.repository.UserRepository;
@@ -47,6 +48,9 @@ class OrderServiceTest {
 
     @Mock
     private OrderItemRepository orderItemRepository;
+
+    @Mock
+    private OrderStatusHistoryRepository orderStatusHistoryRepository;
 
     @Mock
     private MenuRepository menuRepository;
@@ -74,6 +78,7 @@ class OrderServiceTest {
         orderService = new OrderService(
                 orderRepository,
                 orderItemRepository,
+                orderStatusHistoryRepository,
                 menuRepository,
                 userRepository,
                 orderMapper,

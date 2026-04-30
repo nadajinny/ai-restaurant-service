@@ -11,6 +11,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.webjars.WebJarVersionLocator;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -39,6 +40,28 @@ class CommonApiIntegrationTest {
                 .andExpect(jsonPath("$.message").value("입력값이 올바르지 않습니다."))
                 .andExpect(jsonPath("$.errorCode").value("INVALID_INPUT_VALUE"))
                 .andExpect(jsonPath("$.details.message").value("message는 필수입니다."));
+    }
+
+    @Test
+    void openApiSpecEndpointReturnsSuccessResponse() throws Exception {
+        mockMvc.perform(get("/v3/api-docs"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.openapi").value("3.1.0"))
+                .andExpect(jsonPath("$.info.title").value("AI Restaurant Service API"));
+    }
+
+    @Test
+    void swaggerUiEndpointReturnsSuccessResponse() throws Exception {
+        mockMvc.perform(get("/swagger-ui/index.html"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void swaggerUiAssetsEndpointReturnsSuccessResponse() throws Exception {
+        String swaggerUiVersion = new WebJarVersionLocator().version("swagger-ui");
+
+        mockMvc.perform(get("/webjars/swagger-ui/" + swaggerUiVersion + "/swagger-ui-bundle.js"))
+                .andExpect(status().isOk());
     }
 
     @Test

@@ -16,6 +16,7 @@ import com.restaurant.backend.notification.repository.NotificationRepository;
 import com.restaurant.backend.order.domain.Order;
 import com.restaurant.backend.order.domain.OrderItem;
 import com.restaurant.backend.order.domain.OrderStatus;
+import com.restaurant.backend.order.domain.OrderStatusHistory;
 import com.restaurant.backend.order.repository.OrderItemRepository;
 import com.restaurant.backend.order.repository.OrderRepository;
 import com.restaurant.backend.order.repository.OrderStatusHistoryRepository;
@@ -38,6 +39,8 @@ import org.springframework.test.web.servlet.MockMvc;
 @AutoConfigureMockMvc
 @WithMockUser(username = "order-api-user", roles = "USER")
 class OrderControllerIntegrationTest {
+
+    private static final String LOGIN_ID = "order-api-user";
 
     @Autowired
     private MockMvc mockMvc;
@@ -98,7 +101,7 @@ class OrderControllerIntegrationTest {
         userRepository.deleteAll();
         menuRepository.deleteAll();
 
-        userId = userRepository.save(User.create("order-api-user", "password", "주문 API 사용자", UserRole.USER)).getId();
+        userId = userRepository.save(User.create(LOGIN_ID, "password", "주문 API 사용자", UserRole.USER)).getId();
 
         Menu availableMenu1 = menuRepository.save(Menu.create(
                 "김치찌개",
@@ -166,6 +169,11 @@ class OrderControllerIntegrationTest {
         assertThat(order.getStatus()).isEqualTo(OrderStatus.RECEIVED);
         assertThat(order.getTotalPrice()).isEqualTo(29000);
         assertThat(orderItemRepository.countByOrder_Id(orderId)).isEqualTo(2);
+        assertThat(orderStatusHistoryRepository.countByOrder_Id(orderId)).isEqualTo(1);
+        OrderStatusHistory history = orderStatusHistoryRepository.findAllByOrder_IdOrderByCreatedAtAscIdAsc(orderId).get(0);
+        assertThat(history.getFromStatus()).isNull();
+        assertThat(history.getToStatus()).isEqualTo(OrderStatus.RECEIVED);
+        assertThat(history.getChangedBy()).isEqualTo(LOGIN_ID);
         assertThat(inventoryRepository.findByMenu_Id(availableMenuId1).orElseThrow().getQuantity()).isEqualTo(3);
         assertThat(inventoryRepository.findByMenu_Id(availableMenuId2).orElseThrow().getQuantity()).isEqualTo(0);
         assertThat(menuRepository.findById(availableMenuId2).orElseThrow().getStatus()).isEqualTo(MenuStatus.SOLD_OUT);

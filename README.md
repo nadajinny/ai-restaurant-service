@@ -1,177 +1,287 @@
-# ai-restaurant-service
+# AI Restaurant Service
 
-AI 기반 식당 서비스 시스템 프로젝트다. 현재는 요구명세서와 Spring Boot 백엔드 기본 골격이 포함되어 있다.
+AI 기반 식당 서비스 시스템 프로젝트다.  
+고객용 웹, 관리자용 웹, Spring Boot 백엔드, FastAPI AI 서버를 분리해서 개발한다.
 
-## 문서
+초기 구조는 MSA 지향이지만, 백엔드는 하나의 Spring Boot 프로젝트 안에서 도메인별 패키지로 나눠 구현되어 있다.
 
-- [Software Requirements Specification](./SRS.md)
+## 1. 프로젝트 소개
 
-## 현재 구조 요약
+이 프로젝트는 식당 메뉴 조회, 주문, 재주문, 리뷰, 즐겨찾기, 알림, 쿠폰, 결제, 관리자 분석 기능을 제공한다.  
+또한 AI 서버를 통해 메뉴 추천, 감정 기반 추천, 리뷰 초안 생성, 리뷰 요약, 신메뉴 추천 기능을 제공한다.
+
+구성 요소는 다음 4개다.
+
+- 고객용 웹: `customer-web`
+- 관리자용 웹: `admin-web`
+- 백엔드 API 서버: `backend`
+- AI 서버: `ai-server`
+
+## 2. 기술 스택
+
+### Frontend
+
+- Vue 3
+- Vite
+- Vue Router
+
+### Backend
+
+- Java 17
+- Spring Boot 3
+- Spring Security
+- Spring Data JPA
+- JWT
+
+### AI Server
+
+- Python 3.11+
+- FastAPI
+- Uvicorn
+
+### Database / Cache
+
+- SQLite
+- Redis
+
+## 3. 시스템 아키텍처 요약
+
+```text
+Customer Web (Vue)      Admin Web (Vue)
+        |                     |
+        +----------+----------+
+                   |
+            Spring Boot Backend
+                   |
+        +----------+-----------+
+        |                      |
+     SQLite                 Redis
+        |
+     FastAPI AI Server
+```
+
+설명:
+
+- 고객용/관리자용 웹은 모두 백엔드 API를 호출한다.
+- 백엔드는 주문, 메뉴, 리뷰, 재고, 쿠폰, 결제, 분석 로직을 담당한다.
+- AI 관련 요청은 백엔드가 FastAPI AI 서버로 전달한다.
+- Redis가 있으면 캐시를 사용하고, 없어도 로컬 개발에서는 fallback으로 동작한다.
+
+## 4. 주요 기능
+
+### 고객 기능
+
+- 메뉴 목록 조회, 카테고리 필터, 정렬
+- 메뉴 상세 조회
+- 장바구니 관리
+- 주문 생성, 주문 상태 조회, 주문 이력 조회, 재주문
+- 리뷰 작성/수정/삭제
+- 즐겨찾기 추가/해제/조회
+- 알림 조회 및 읽음 처리
+- AI 메뉴 추천
+- 감정 기반 추천
+- AI 리뷰 초안 생성
+
+### 관리자 기능
+
+- 관리자 대시보드
+- 메뉴 등록/수정/삭제/상태 변경
+- 주문 목록 조회 및 상태 변경
+- 리뷰 조회 및 숨김 처리
+- 재고 수정, 품절 처리, 판매 가능 처리
+- 매출 분석, 인기 메뉴 분석, 시간대별 주문량 분석
+- 쿠폰 생성/수정/비활성화
+- AI 신메뉴 추천 조회
+
+## 5. 프로젝트 구조
 
 ```text
 .
-├── SRS.md
 ├── README.md
+├── SRS.md
+├── backend
 ├── ai-server
-│   ├── .env.example
-│   ├── requirements.txt
-│   └── app
-│       ├── api
-│       ├── clients
-│       ├── core
-│       ├── schemas
-│       └── services
 ├── customer-web
-│   ├── package.json
-│   ├── vite.config.js
-│   └── src
-│       ├── api
-│       ├── components
-│       ├── config
-│       ├── layouts
-│       ├── navigation
-│       ├── router
-│       ├── styles
-│       └── views
-├── admin-web
-│   ├── package.json
-│   ├── vite.config.js
-│   └── src
-│       ├── api
-│       ├── components
-│       ├── config
-│       ├── layouts
-│       ├── navigation
-│       ├── router
-│       ├── styles
-│       └── views
-└── backend
-    ├── build.gradle
-    ├── gradlew
-    ├── gradle/wrapper
-    └── src
-        ├── main
-        │   ├── java/com/restaurant/backend
-        │   │   ├── common
-        │   │   ├── config
-        │   │   ├── user
-        │   │   ├── menu
-        │   │   ├── order
-        │   │   ├── review
-        │   │   ├── favorite
-        │   │   ├── inventory
-        │   │   ├── payment
-        │   │   ├── coupon
-        │   │   ├── notification
-        │   │   ├── analytics
-        │   │   └── ai
-        │   └── resources
-        └── test
-            └── java/com/restaurant/backend
+└── admin-web
 ```
 
-각 도메인 패키지는 기본적으로 다음 계층을 가진다.
+## 6. 사전 준비
 
-- `controller`
-- `service`
-- `repository`
-- `domain`
-- `dto`
+다음이 먼저 설치되어 있어야 한다.
 
-`common` 패키지에는 다음 공통 구조가 포함되어 있다.
+- Java 17
+- Node.js 20 이상
+- Python 3.11 이상
+- Redis (선택)
 
-- 일관된 API 응답용 `ApiResponse`
-- `ErrorCode`
-- `BusinessException`
-- `GlobalExceptionHandler`
-- `HealthController`
-
-## 공통 응답 형식
-
-성공 응답 예시
-
-```json
-{
-  "success": true,
-  "message": "요청이 성공했습니다.",
-  "data": {}
-}
-```
-
-실패 응답 예시
-
-```json
-{
-  "success": false,
-  "message": "요청한 리소스를 찾을 수 없습니다.",
-  "errorCode": "RESOURCE_NOT_FOUND"
-}
-```
-
-## 백엔드 실행 방법
-
-Java 17이 필요하다.
+버전 확인 명령어:
 
 ```bash
-cd backend
+java -version
+node -v
+python3 --version
+redis-server --version
+```
+
+## 7. 환경 변수 설정 방법
+
+### 7-1. 고객용 웹
+
+```bash
+cd /Users/leejinsun/Desktop/Develop/campus/oss/restaurant/customer-web
+cp .env.example .env
+```
+
+기본 값:
+
+```env
+VITE_API_BASE_URL=http://localhost:8080
+VITE_AI_SERVER_BASE_URL=http://localhost:8000
+```
+
+### 7-2. 관리자용 웹
+
+```bash
+cd /Users/leejinsun/Desktop/Develop/campus/oss/restaurant/admin-web
+cp .env.example .env
+```
+
+기본 값:
+
+```env
+VITE_API_BASE_URL=http://localhost:8080
+VITE_AI_SERVER_BASE_URL=http://localhost:8000
+```
+
+### 7-3. AI 서버
+
+```bash
+cd /Users/leejinsun/Desktop/Develop/campus/oss/restaurant/ai-server
+cp .env.example .env
+```
+
+기본 값:
+
+```env
+AI_PROVIDER=mock
+OPENAI_API_KEY=your-openai-api-key
+BACKEND_BASE_URL=http://localhost:8080
+BACKEND_CONNECT_TIMEOUT=3.0
+BACKEND_READ_TIMEOUT=5.0
+```
+
+### 7-4. 백엔드
+
+백엔드는 기본적으로 `backend/src/main/resources/application.yml`을 사용한다.  
+환경 변수로 필요한 값을 덮어쓸 수 있다.
+
+주요 환경 변수:
+
+```bash
+export RESTAURANT_DB_PATH=/absolute/path/to/restaurant.db
+export JWT_SECRET=change-this-secret
+export JWT_ACCESS_TOKEN_EXPIRATION_MS=21600000
+export AI_SERVER_BASE_URL=http://localhost:8000
+export CACHE_ENABLED=true
+export CACHE_REDIS_ENABLED=true
+```
+
+Redis 없이 실행하려면:
+
+```bash
+export CACHE_REDIS_ENABLED=false
+```
+
+## 8. 백엔드 실행 방법
+
+```bash
+cd /Users/leejinsun/Desktop/Develop/campus/oss/restaurant/backend
 ./gradlew bootRun
 ```
 
-기본 포트는 `8080`이다.
+기본 주소:
 
-기본 데이터베이스는 SQLite이며, 실행 시 `backend/restaurant.db` 파일이 생성될 수 있다.
+- Backend: [http://localhost:8080](http://localhost:8080)
+- Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+- OpenAPI JSON: [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
 
-## 고객용 웹 실행 방법
-
-Node.js 20 이상을 권장한다.
+헬스 체크:
 
 ```bash
-cd customer-web
+curl http://localhost:8080/api/v1/health
+```
+
+Swagger 확인:
+
+```bash
+open http://localhost:8080/swagger-ui.html
+```
+
+참고:
+
+- SQLite DB 파일은 실행 위치와 무관하게 기본적으로 `backend/restaurant.db`로 생성된다.
+- 다른 위치를 쓰려면 `RESTAURANT_DB_PATH` 환경 변수에 절대 경로를 지정한다.
+- Redis가 없어도 `CACHE_REDIS_ENABLED=false` 또는 fallback 구조로 개발 가능하다.
+
+### 8-1. Swagger 확인 방법
+
+1. 백엔드를 먼저 실행한다.
+
+```bash
+cd /Users/leejinsun/Desktop/Develop/campus/oss/restaurant/backend
+./gradlew bootRun
+```
+
+2. 브라우저에서 아래 주소 중 하나로 접속한다.
+
+- Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+- Swagger UI 대체 경로: [http://localhost:8080/swagger-ui/index.html](http://localhost:8080/swagger-ui/index.html)
+- OpenAPI JSON: [http://localhost:8080/v3/api-docs](http://localhost:8080/v3/api-docs)
+
+3. 인증이 필요한 API를 테스트하려면 먼저 로그인한다.
+
+- `POST /auth/login` 실행
+- 응답의 `accessToken` 복사
+- Swagger 우측 상단 `Authorize` 버튼 클릭
+- `Bearer <accessToken>` 형식으로 입력
+
+참고:
+
+- `application.yml`에서 `springdoc.swagger-ui.enabled`는 `false`지만, 백엔드의 `SwaggerUiController`가 `/swagger-ui.html`과 `/swagger-ui/index.html`을 직접 제공한다.
+- Swagger 페이지가 열리지 않으면 백엔드가 `8080` 포트에서 정상 실행 중인지 먼저 확인한다.
+
+## 9. 프론트엔드 실행 방법
+
+### 9-1. 고객용 웹 실행
+
+```bash
+cd /Users/leejinsun/Desktop/Develop/campus/oss/restaurant/customer-web
 cp .env.example .env
 npm install
 npm run dev
 ```
 
-기본 포트는 `5173`이다.
+기본 주소:
 
-고객용 웹 구조 요약
+- Customer Web: [http://localhost:5173](http://localhost:5173)
 
-- 고객용 라우트: `/`, `/menus`, `/menus/:menuId`, `/cart`, `/orders/status`, `/orders/history`, `/ai/recommend`, `/reviews/write`, `/favorites`, `/notifications`
-- 공통 레이아웃: `src/layouts/CustomerLayout.vue`
-- API 클라이언트: `src/api/httpClient.js`와 `src/api/modules/*`
-
-## 관리자용 웹 실행 방법
+### 9-2. 관리자용 웹 실행
 
 ```bash
-cd admin-web
+cd /Users/leejinsun/Desktop/Develop/campus/oss/restaurant/admin-web
 cp .env.example .env
 npm install
 npm run dev
 ```
 
-기본 포트는 `5174`이다.
+기본 주소:
 
-관리자용 웹 구조 요약
+- Admin Web: [http://localhost:5174](http://localhost:5174)
 
-- 관리자용 라우트: `/admin`, `/admin/menus`, `/admin/orders`, `/admin/reviews`, `/admin/inventories`, `/admin/sales`, `/admin/coupons`, `/admin/ai/new-menus`
-- 공통 레이아웃: `src/layouts/AdminLayout.vue`
-- API 클라이언트: `src/api/httpClient.js`와 `src/api/modules/*`
-
-Redis 캐시는 기본적으로 `localhost:6379`를 사용한다. Redis가 없더라도 서버가 완전히 죽지 않도록 메모리 캐시 fallback이 적용되어 있다.
-
-로컬에서 Redis 없이 실행하려면 다음처럼 비활성화할 수 있다.
+## 10. AI 서버 실행 방법
 
 ```bash
-cd backend
-CACHE_REDIS_ENABLED=false ./gradlew bootRun
-```
-
-## AI 서버 실행 방법
-
-Python 3.11 이상을 권장한다.
-
-```bash
-cd ai-server
+cd /Users/leejinsun/Desktop/Develop/campus/oss/restaurant/ai-server
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -179,16 +289,64 @@ cp .env.example .env
 uvicorn app.main:app --reload --port 8000
 ```
 
-기본 포트는 `8000`이다.
+기본 주소:
 
-## 인증 및 기본 계정
+- AI Server: [http://localhost:8000](http://localhost:8000)
 
-JWT 인증이 적용되어 있다. 로그인 후 받은 `accessToken`을 `Authorization: Bearer <token>` 헤더로 전달해야 한다.
+Mock 모드 설명:
 
-- 고객 기본 계정: `user01 / password`
-- 관리자 기본 계정: `admin01 / password`
+- 현재는 실제 GPT 연동 없이 Mock 응답으로도 동작한다.
+- `AI_PROVIDER=mock` 상태면 로컬 개발이 가능하다.
 
-로그인 예시
+## 11. 전체 실행 순서
+
+초보자 기준 권장 순서:
+
+### 11-1. AI 서버 실행
+
+```bash
+cd /Users/leejinsun/Desktop/Develop/campus/oss/restaurant/ai-server
+source .venv/bin/activate
+uvicorn app.main:app --reload --port 8000
+```
+
+### 11-2. 백엔드 실행
+
+새 터미널:
+
+```bash
+cd /Users/leejinsun/Desktop/Develop/campus/oss/restaurant/backend
+./gradlew bootRun
+```
+
+### 11-3. 고객용 웹 실행
+
+새 터미널:
+
+```bash
+cd /Users/leejinsun/Desktop/Develop/campus/oss/restaurant/customer-web
+npm install
+npm run dev
+```
+
+### 11-4. 관리자용 웹 실행
+
+새 터미널:
+
+```bash
+cd /Users/leejinsun/Desktop/Develop/campus/oss/restaurant/admin-web
+npm install
+npm run dev
+```
+
+## 12. 기본 로그인 계정
+
+백엔드 초기 데이터로 다음 계정이 생성된다.
+
+- 고객 계정: `user01 / password`
+- 관리자 계정: `admin01 / password`
+
+로그인 API 예시:
 
 ```bash
 curl -X POST http://localhost:8080/auth/login \
@@ -199,370 +357,83 @@ curl -X POST http://localhost:8080/auth/login \
   }'
 ```
 
-예시 엔드포인트
+## 13. API 문서 위치
 
-- `GET /api/v1/health`
+현재 Swagger / OpenAPI UI는 추가되어 있지 않다.  
+대신 아래 문서를 기준으로 API를 확인하면 된다.
+
+- 요구명세서: [SRS.md](/Users/leejinsun/Desktop/Develop/campus/oss/restaurant/SRS.md)
+- 프로젝트 실행 및 주요 엔드포인트 요약: [README.md](/Users/leejinsun/Desktop/Develop/campus/oss/restaurant/README.md)
+- 백엔드 컨트롤러 코드: [backend/src/main/java/com/restaurant/backend](/Users/leejinsun/Desktop/Develop/campus/oss/restaurant/backend/src/main/java/com/restaurant/backend)
+
+대표 엔드포인트 예시:
+
 - `POST /auth/login`
-- `GET /api/v1/users/me`
 - `GET /menus`
-- `GET /menus?category=KOREAN`
-- `GET /menus?minPrice=8000&maxPrice=12000&status=AVAILABLE&sort=PRICE_ASC`
-- `GET /menus/{menuId}`
-- `POST /favorites`
-- `GET /favorites`
-- `DELETE /favorites/{menuId}`
-- `GET /orders`
-- `GET /orders/{orderId}`
 - `POST /orders`
-- `POST /orders/{orderId}/reorder`
 - `POST /reviews`
-- `GET /menus/{menuId}/reviews`
-- `PUT /reviews/{reviewId}`
-- `DELETE /reviews/{reviewId}`
-- `GET /admin/reviews`
-- `PATCH /admin/reviews/{reviewId}/hide`
-- `GET /admin/inventories`
-- `PUT /admin/inventories/{menuId}`
-- `PATCH /admin/inventories/{menuId}/sold-out`
-- `PATCH /admin/inventories/{menuId}/available`
-- `POST /payments`
-- `GET /payments/{paymentId}`
-- `POST /payments/{paymentId}/cancel`
-- `POST /admin/coupons`
-- `PUT /admin/coupons/{couponId}`
-- `PATCH /admin/coupons/{couponId}/disable`
-- `GET /coupons/available`
-- `POST /coupons/apply`
+- `POST /favorites`
 - `GET /notifications`
-- `PATCH /notifications/{notificationId}/read`
-- `GET /admin/dashboard`
-- `GET /admin/analytics/sales`
-- `GET /admin/analytics/popular-menus`
-- `GET /admin/analytics/menu-performance`
-- `GET /admin/analytics/hourly-orders`
-- `PATCH /admin/orders/{orderId}/status`
-- `POST /admin/menus`
-- `PUT /admin/menus/{menuId}`
-- `DELETE /admin/menus/{menuId}`
-- `PATCH /admin/menus/{menuId}/status`
-- `POST /api/v1/ai/recommendations/mock`
 - `POST /ai/recommend`
-- `GET /ai/personalized-recommendations`
-- `POST /ai/emotion-recommend`
-- `POST /ai/review-generate`
-- `GET /ai/menus/{menuId}/review-summary`
-- `GET /admin/ai/new-menu-recommendations`
+- `GET /admin/dashboard`
 
-헬스 체크 예시
+## 14. 테스트 실행 방법
+
+### 14-1. 백엔드 테스트
 
 ```bash
-curl http://localhost:8080/api/v1/health
-```
-
-AI 추천 Mock 요청 예시
-
-```bash
-curl -X POST http://localhost:8080/api/v1/ai/recommendations/mock \
-  -H "Content-Type: application/json" \
-  -d '{"message":"매운 음식 추천해줘"}'
-```
-
-백엔드 AI 프록시 예시
-
-```bash
-curl -X POST "http://localhost:8080/ai/recommend" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "message": "오늘 매운 음식이 먹고 싶어"
-  }'
-
-curl "http://localhost:8080/ai/personalized-recommendations" \
-  -H "Authorization: Bearer <access-token>"
-
-curl -X POST "http://localhost:8080/ai/emotion-recommend" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "emotion": "stressed",
-    "context": "오늘 일이 많았어"
-  }'
-
-curl -X POST "http://localhost:8080/ai/review-generate" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "menuId": 1,
-    "keywords": ["맛있다", "양이 많다", "친절하다"]
-  }'
-
-curl "http://localhost:8080/ai/menus/1/review-summary"
-curl "http://localhost:8080/admin/ai/new-menu-recommendations"
-```
-
-## 캐시 전략
-
-- 전체 메뉴 목록과 카테고리/필터 기반 메뉴 목록은 10분 TTL로 캐시된다.
-- 메뉴 상세 정보는 10분 TTL로 캐시된다.
-- 인기 메뉴 목록은 30분 TTL로 캐시된다.
-- 리뷰 요약 결과는 메뉴별로 캐시되며 리뷰 작성, 수정, 삭제, 숨김 처리 시 무효화된다.
-- 개인화 추천 결과는 사용자별로 캐시되며 주문, 즐겨찾기, 리뷰 변경 시 무효화된다.
-- 관리자 대시보드와 분석 캐시는 짧은 TTL을 사용하며 주문/결제/재고/메뉴 변경 시 무효화된다.
-
-메뉴 조회 예시
-
-```bash
-curl http://localhost:8080/menus
-curl "http://localhost:8080/menus?category=KOREAN"
-curl "http://localhost:8080/menus?minPrice=8000&maxPrice=12000&status=AVAILABLE&sort=PRICE_ASC"
-curl http://localhost:8080/menus/1
-```
-
-관리자 메뉴 관리 예시
-
-```bash
-curl -X POST http://localhost:8080/admin/menus \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "새우볶음밥",
-    "category": "CHINESE",
-    "price": 9500,
-    "description": "불향이 나는 새우볶음밥",
-    "imageUrl": "https://example.com/fried-rice.jpg",
-    "cookingTime": 12,
-    "status": "AVAILABLE"
-  }'
-```
-
-즐겨찾기 예시
-
-```bash
-curl -X POST "http://localhost:8080/favorites" \
-  -H "Authorization: Bearer <access-token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "menuId": 1
-  }'
-
-curl "http://localhost:8080/favorites" \
-  -H "Authorization: Bearer <access-token>"
-curl -X DELETE "http://localhost:8080/favorites/1" \
-  -H "Authorization: Bearer <access-token>"
-```
-
-주문 생성 예시
-
-```bash
-curl -X POST http://localhost:8080/orders \
-  -H "Content-Type: application/json" \
-  -d '{
-    "items": [
-      { "menuId": 1, "quantity": 2 },
-      { "menuId": 3, "quantity": 1 }
-    ],
-    "couponCode": "WELCOME10"
-  }'
-```
-
-재주문 예시
-
-```bash
-curl -X POST "http://localhost:8080/orders/1/reorder" \
-  -H "Authorization: Bearer <access-token>"
-
-curl -X POST "http://localhost:8080/orders/1/reorder" \
-  -H "Authorization: Bearer <access-token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "menuIds": [1, 3]
-  }'
-```
-
-주문 조회 예시
-
-```bash
-curl "http://localhost:8080/orders" \
-  -H "Authorization: Bearer <access-token>"
-curl "http://localhost:8080/orders/1" \
-  -H "Authorization: Bearer <access-token>"
-```
-
-주문 상태 변경 예시
-
-```bash
-curl -X PATCH http://localhost:8080/admin/orders/1/status \
-  -H "Content-Type: application/json" \
-  -d '{
-    "status": "COOKING"
-  }'
-```
-
-리뷰 API 예시
-
-```bash
-curl -X POST "http://localhost:8080/reviews" \
-  -H "Authorization: Bearer <access-token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "orderId": 1,
-    "menuId": 1,
-    "content": "맛있고 양도 충분했습니다.",
-    "rating": 5,
-    "aiGenerated": false
-  }'
-
-curl "http://localhost:8080/menus/1/reviews"
-
-curl -X PUT "http://localhost:8080/reviews/1" \
-  -H "Authorization: Bearer <access-token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "content": "양도 충분하고 다시 주문하고 싶습니다.",
-    "rating": 5,
-    "aiGenerated": true
-  }'
-
-curl -X DELETE "http://localhost:8080/reviews/1" \
-  -H "Authorization: Bearer <access-token>"
-curl "http://localhost:8080/admin/reviews"
-curl -X PATCH "http://localhost:8080/admin/reviews/1/hide"
-```
-
-재고 관리 예시
-
-```bash
-curl "http://localhost:8080/admin/inventories"
-
-curl -X PUT "http://localhost:8080/admin/inventories/1" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "quantity": 15
-  }'
-
-curl -X PATCH "http://localhost:8080/admin/inventories/1/sold-out"
-curl -X PATCH "http://localhost:8080/admin/inventories/1/available"
-```
-
-결제 예시
-
-```bash
-curl -X POST "http://localhost:8080/payments" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "orderId": 1,
-    "mockResult": "APPROVED"
-  }'
-
-curl -X POST "http://localhost:8080/payments" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "orderId": 2,
-    "mockResult": "FAILED"
-  }'
-
-curl "http://localhost:8080/payments/1"
-curl -X POST "http://localhost:8080/payments/1/cancel"
-```
-
-쿠폰 예시
-
-```bash
-curl -X POST "http://localhost:8080/admin/coupons" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "code": "WELCOME10",
-    "name": "웰컴 10퍼센트",
-    "discountAmount": null,
-    "discountRate": 10,
-    "maxDiscountAmount": 3000,
-    "minOrderAmount": 10000,
-    "availableFrom": "2026-04-01T00:00:00",
-    "availableTo": "2026-05-31T23:59:59",
-    "availableCount": 100,
-    "active": true
-  }'
-
-curl -X PUT "http://localhost:8080/admin/coupons/1" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "code": "WELCOME10",
-    "name": "웰컴 2000원",
-    "discountAmount": 2000,
-    "discountRate": null,
-    "maxDiscountAmount": null,
-    "minOrderAmount": 12000,
-    "availableFrom": "2026-04-01T00:00:00",
-    "availableTo": "2026-05-31T23:59:59",
-    "availableCount": 50,
-    "active": true
-  }'
-
-curl -X PATCH "http://localhost:8080/admin/coupons/1/disable"
-curl "http://localhost:8080/coupons/available"
-
-curl -X POST "http://localhost:8080/coupons/apply" \
-  -H "Authorization: Bearer <access-token>" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "orderId": 1,
-    "couponCode": "WELCOME10"
-  }'
-```
-
-알림 예시
-
-```bash
-curl "http://localhost:8080/notifications" \
-  -H "Authorization: Bearer <access-token>"
-curl -X PATCH "http://localhost:8080/notifications/1/read" \
-  -H "Authorization: Bearer <access-token>"
-```
-
-대시보드 및 분석 예시
-
-```bash
-curl "http://localhost:8080/admin/dashboard"
-curl "http://localhost:8080/admin/analytics/sales"
-curl "http://localhost:8080/admin/analytics/popular-menus"
-curl "http://localhost:8080/admin/analytics/menu-performance"
-curl "http://localhost:8080/admin/analytics/hourly-orders"
-```
-
-AI 서버 예시
-
-```bash
-curl -X POST "http://localhost:8000/ai/recommend" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "message": "오늘 매운 음식이 먹고 싶어"
-  }'
-
-curl "http://localhost:8000/ai/personalized-recommendations?userId=1"
-
-curl -X POST "http://localhost:8000/ai/emotion-recommend" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "emotion": "stressed",
-    "context": "오늘 일이 많았어"
-  }'
-
-curl -X POST "http://localhost:8000/ai/review-generate" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "menuId": 1,
-    "keywords": ["맛있다", "양이 많다", "친절하다"]
-  }'
-
-curl "http://localhost:8000/ai/menus/1/review-summary"
-curl "http://localhost:8000/admin/ai/new-menu-recommendations"
-```
-
-## 테스트 방법
-
-```bash
-cd backend
+cd /Users/leejinsun/Desktop/Develop/campus/oss/restaurant/backend
 ./gradlew test
 ```
 
+깨끗하게 다시 실행하려면:
+
 ```bash
+cd /Users/leejinsun/Desktop/Develop/campus/oss/restaurant/backend
+./gradlew clean test
+```
+
+### 14-2. 고객용 웹 빌드 테스트
+
+```bash
+cd /Users/leejinsun/Desktop/Develop/campus/oss/restaurant/customer-web
+npm install
+npm run build
+```
+
+### 14-3. 관리자용 웹 빌드 테스트
+
+```bash
+cd /Users/leejinsun/Desktop/Develop/campus/oss/restaurant/admin-web
+npm install
+npm run build
+```
+
+### 14-4. AI 서버 문법 확인
+
+```bash
+cd /Users/leejinsun/Desktop/Develop/campus/oss/restaurant
 python3 -m compileall ai-server/app
 ```
 
-현재는 메뉴 조회/관리, 주문 생성/조회/재주문/상태 변경, 재고 관리, Mock 결제, 쿠폰/할인, 알림, 대시보드/분석, 즐겨찾기, 리뷰 기능을 포함한 Spring Boot 백엔드와, Mock 기반 추천/리뷰 생성/요약을 제공하는 FastAPI AI 서버 기본 구조가 구현되어 있다. 인증과 실제 GPT 연동은 이후 단계에서 확장할 수 있다.
+## 15. 개발 시 주의사항
+
+- 백엔드는 `controller`, `service`, `repository`, `domain`, `dto` 계층을 유지해야 한다.
+- 엔티티를 그대로 API 응답으로 반환하지 말고 DTO를 사용해야 한다.
+- 클라이언트가 보낸 가격, 할인 금액, 총액은 신뢰하지 말고 서버에서 다시 계산해야 한다.
+- 주문, 리뷰, 즐겨찾기, 알림, 개인화 추천은 인증이 필요한 API다.
+- `/admin/**` API는 관리자 권한이 필요하다.
+- Redis는 선택 사항이지만, 운영 환경에서는 사용하는 것을 권장한다.
+- `.env`, `node_modules`, `build`, `dist`, `restaurant.db`는 Git에 올리지 않는다.
+- AI 기능은 실제 GPT 연동 전에도 Mock 또는 Stub으로 동작할 수 있게 유지해야 한다.
+- 기능 추가 후에는 최소한 아래 명령은 다시 실행하는 것이 좋다.
+
+```bash
+cd /Users/leejinsun/Desktop/Develop/campus/oss/restaurant/backend && ./gradlew test
+cd /Users/leejinsun/Desktop/Develop/campus/oss/restaurant/customer-web && npm run build
+cd /Users/leejinsun/Desktop/Develop/campus/oss/restaurant/admin-web && npm run build
+```
+
+## 16. 참고 문서
+
+- 요구명세서: [SRS.md](/Users/leejinsun/Desktop/Develop/campus/oss/restaurant/SRS.md)

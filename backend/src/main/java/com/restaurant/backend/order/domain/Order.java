@@ -81,6 +81,11 @@ public class Order extends BaseEntity {
         this.totalPrice = Math.max(0, this.originalTotalPrice - discountAmount);
     }
 
+    public void clearDiscount() {
+        this.discountAmount = 0;
+        this.totalPrice = this.originalTotalPrice;
+    }
+
     public User getUser() {
         return user;
     }

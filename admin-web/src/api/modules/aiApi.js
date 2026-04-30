@@ -7,8 +7,8 @@ export const aiApi = {
       body: JSON.stringify(payload),
     });
   },
-  getPersonalizedRecommendations(userId) {
-    return apiRequest(`/ai/personalized-recommendations?userId=${userId}`);
+  getPersonalizedRecommendations() {
+    return apiRequest("/ai/personalized-recommendations");
   },
   emotionRecommend(payload) {
     return apiRequest("/ai/emotion-recommend", {

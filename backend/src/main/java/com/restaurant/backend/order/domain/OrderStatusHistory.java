@@ -11,7 +11,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "order_status_histories")
+@Table(name = "order_status_history")
 public class OrderStatusHistory extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)

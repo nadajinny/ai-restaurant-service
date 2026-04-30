@@ -182,7 +182,6 @@ onMounted(async () => {
 
     <PagePanel
       title="자연어 추천"
-      endpoint="POST /ai/recommend"
       description="원하는 음식 취향을 자연어로 입력하면 추천 이유와 함께 메뉴를 제안합니다."
     >
       <p v-if="feedbackMessage" class="info-banner">{{ feedbackMessage }}</p>
@@ -224,7 +223,6 @@ onMounted(async () => {
 
     <PagePanel
       title="감정 기반 추천"
-      endpoint="POST /ai/emotion-recommend"
       description="현재 감정과 상황을 입력해 분위기에 맞는 메뉴를 추천받습니다."
     >
       <div class="ai-form-grid">
@@ -308,7 +306,6 @@ onMounted(async () => {
 
     <PagePanel
       title="개인화 추천"
-      endpoint="GET /ai/personalized-recommendations"
       description="주문 이력과 선호 기반 추천을 별도 섹션으로 제공합니다."
     >
       <p v-if="personalizedLoading" class="state-copy">개인화 추천을 불러오는 중입니다.</p>

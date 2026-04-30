@@ -80,10 +80,10 @@ onMounted(async () => {
     <PageHero
       badge="Menus"
       title="메뉴 목록 화면"
-      description="API 기반 메뉴 목록을 조회하고 카테고리와 정렬 조건으로 탐색하는 고객용 화면입니다."
+      description="카테고리와 정렬 조건으로 메뉴를 둘러보고 원하는 메뉴를 고를 수 있습니다."
     />
 
-    <PagePanel title="탐색 조건" endpoint="GET /menus" description="카테고리 필터와 정렬 조건을 서버 API에 직접 전달합니다.">
+    <PagePanel title="탐색 조건" description="카테고리와 정렬 기준을 바꿔 원하는 메뉴를 빠르게 찾을 수 있습니다.">
       <div class="menu-toolbar">
         <label class="field-stack">
           <span>카테고리</span>
@@ -113,7 +113,7 @@ onMounted(async () => {
 
     <PagePanel
       title="메뉴 목록"
-      description="품절 메뉴는 조회 가능하지만 주문 불가로 표시하고, 판매 중지 메뉴는 API에서 제외됩니다."
+      description="품절 메뉴는 확인할 수 있지만 주문은 할 수 없고, 판매 중지 메뉴는 목록에서 제외됩니다."
     >
       <p v-if="feedbackMessage" class="info-banner">{{ feedbackMessage }}</p>
       <p v-if="errorMessage" class="error-banner">{{ errorMessage }}</p>

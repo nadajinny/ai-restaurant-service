@@ -8,10 +8,6 @@ defineProps({
     type: String,
     default: "",
   },
-  endpoint: {
-    type: String,
-    default: "",
-  },
 });
 </script>
 
@@ -22,7 +18,6 @@ defineProps({
         <h2 class="page-panel__title">{{ title }}</h2>
         <p v-if="description" class="page-panel__description">{{ description }}</p>
       </div>
-      <code v-if="endpoint" class="page-panel__endpoint">{{ endpoint }}</code>
     </div>
     <div class="page-panel__body">
       <slot />

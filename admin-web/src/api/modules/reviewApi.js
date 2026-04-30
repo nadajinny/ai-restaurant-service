@@ -1,8 +1,8 @@
 import { apiRequest } from "@/api/httpClient";
 
 export const reviewApi = {
-  createReview(userId, payload) {
-    return apiRequest(`/reviews?userId=${userId}`, {
+  createReview(payload) {
+    return apiRequest("/reviews", {
       method: "POST",
       body: JSON.stringify(payload),
     });
@@ -10,14 +10,14 @@ export const reviewApi = {
   getMenuReviews(menuId) {
     return apiRequest(`/menus/${menuId}/reviews`);
   },
-  updateReview(reviewId, userId, payload) {
-    return apiRequest(`/reviews/${reviewId}?userId=${userId}`, {
+  updateReview(reviewId, payload) {
+    return apiRequest(`/reviews/${reviewId}`, {
       method: "PUT",
       body: JSON.stringify(payload),
     });
   },
-  deleteReview(reviewId, userId) {
-    return apiRequest(`/reviews/${reviewId}?userId=${userId}`, {
+  deleteReview(reviewId) {
+    return apiRequest(`/reviews/${reviewId}`, {
       method: "DELETE",
     });
   },

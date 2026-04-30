@@ -221,6 +221,37 @@ class ReviewControllerIntegrationTest {
     }
 
     @Test
+    void createReviewRejectsNonCompletedOrder() throws Exception {
+        Order inProgressOrder = orderRepository.save(Order.create(
+                userRepository.findById(userId).orElseThrow(),
+                9000,
+                OrderStatus.COOKING
+        ));
+        orderItemRepository.save(OrderItem.create(
+                inProgressOrder,
+                menuRepository.findById(menuId).orElseThrow(),
+                1,
+                9000
+        ));
+
+        mockMvc.perform(post("/reviews")
+                        .param("userId", String.valueOf(userId))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "orderId": %d,
+                                  "menuId": %d,
+                                  "content": "아직 완료 전 주문 리뷰",
+                                  "rating": 4,
+                                  "aiGenerated": false
+                                }
+                                """.formatted(inProgressOrder.getId(), menuId)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.errorCode").value("INVALID_INPUT_VALUE"));
+    }
+
+    @Test
     void getMenuReviewsReturnsOnlyActiveReviews() throws Exception {
         reviewRepository.save(Review.create(
                 userRepository.findById(userId).orElseThrow(),

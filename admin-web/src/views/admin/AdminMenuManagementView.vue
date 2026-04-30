@@ -3,7 +3,7 @@ import { adminMenuApi } from "@/api";
 import PageHero from "@/components/PageHero.vue";
 import PagePanel from "@/components/PagePanel.vue";
 import { formatCurrency } from "@/utils/format";
-import { onMounted, reactive, ref } from "vue";
+import { computed, onMounted, reactive, ref } from "vue";
 
 const menus = ref([]);
 const loading = ref(false);
@@ -23,7 +23,14 @@ const form = reactive({
 });
 
 const statusOptions = ["AVAILABLE", "SOLD_OUT", "HIDDEN"];
-const categoryOptions = ["KOREAN", "CHINESE", "JAPANESE", "WESTERN", "SNACK", "DESSERT"];
+const defaultCategoryOptions = ["KOREAN", "CHINESE", "JAPANESE", "WESTERN", "SNACK", "DESSERT"];
+const categoryOptions = computed(() =>
+  [
+    ...new Set(
+      [...defaultCategoryOptions, ...menus.value.map((menu) => menu.category), form.category].filter(Boolean),
+    ),
+  ],
+);
 
 function resetForm() {
   editingMenuId.value = null;
@@ -109,7 +116,7 @@ onMounted(fetchMenus);
   <div class="page-stack">
     <PageHero badge="Admin Menus" title="메뉴 관리" description="메뉴 등록, 수정, 삭제, 상태 변경을 처리합니다." />
 
-    <PagePanel title="메뉴 등록 / 수정" endpoint="GET, POST, PUT, DELETE, PATCH /admin/menus">
+    <PagePanel title="메뉴 등록 / 수정">
       <p v-if="feedbackMessage" class="info-banner">{{ feedbackMessage }}</p>
       <p v-if="errorMessage" class="error-banner">{{ errorMessage }}</p>
 

@@ -134,7 +134,7 @@ onMounted(() => {
       description="이름, 가격, 설명, 조리 시간과 판매 상태를 확인하고 장바구니에 담을 수 있습니다."
     />
 
-    <PagePanel title="메뉴 상세" endpoint="GET /menus/{menuId}" description="판매 중지 메뉴는 조회되지 않고, 품절 메뉴는 주문 불가로 표시됩니다.">
+    <PagePanel title="메뉴 상세" description="판매 중지 메뉴는 보이지 않으며, 품절 메뉴는 주문할 수 없도록 표시됩니다.">
       <p v-if="feedbackMessage" class="info-banner">{{ feedbackMessage }}</p>
       <p v-if="errorMessage" class="error-banner">{{ errorMessage }}</p>
       <p v-if="loading" class="state-copy">상세 정보를 불러오는 중입니다.</p>
@@ -192,8 +192,7 @@ onMounted(() => {
 
     <PagePanel
       title="리뷰 목록"
-      endpoint="GET /menus/{menuId}/reviews"
-      description="메뉴 상세 화면에서 ACTIVE 상태의 리뷰만 조회합니다."
+      description="다른 고객이 남긴 최신 리뷰를 확인할 수 있습니다."
     >
       <p v-if="reviewLoading" class="state-copy">리뷰를 불러오는 중입니다.</p>
       <p v-else-if="reviews.length === 0" class="state-copy">아직 작성된 리뷰가 없습니다.</p>
